@@ -1,0 +1,497 @@
+openapi: 3.1.0
+info:
+  title: Controle de Estoque da Conveniencia API
+  version: 1.0.0
+  description: API para produtos, lotes, movimentacoes, alertas e auditoria.
+servers:
+  - url: http://localhost:3333
+tags:
+  - name: Auth
+  - name: Products
+  - name: Inventory
+  - name: Reports
+paths:
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Authenticate user and return JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+  /products:
+    get:
+      tags: [Products]
+      summary: List products with stock snapshot
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [active, inactive]
+      responses:
+        '200':
+          description: Product list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProductStockView'
+    post:
+      tags: [Products]
+      summary: Create product
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductRequest'
+      responses:
+        '201':
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductView'
+  /products/{productId}:
+    get:
+      tags: [Products]
+      summary: Get product details
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: Product detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetailView'
+    patch:
+      tags: [Products]
+      summary: Update product
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProductRequest'
+      responses:
+        '200':
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductView'
+  /products/{productId}/deactivate:
+    post:
+      tags: [Products]
+      summary: Deactivate product
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: Product deactivated
+  /inventory/entries:
+    post:
+      tags: [Inventory]
+      summary: Register inventory entry by lot
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEntryRequest'
+      responses:
+        '201':
+          description: Entry registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovementView'
+  /inventory/exits:
+    post:
+      tags: [Inventory]
+      summary: Register inventory exit
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateExitRequest'
+      responses:
+        '201':
+          description: Exit registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovementView'
+  /inventory/expired-release:
+    post:
+      tags: [Inventory]
+      summary: Approve exceptional use of expired lot
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpiredReleaseRequest'
+      responses:
+        '201':
+          description: Release approved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovementView'
+  /inventory/stock:
+    get:
+      tags: [Inventory]
+      summary: Search stock by product SKU or name
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: search
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Stock search result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProductStockView'
+  /reports/movements:
+    get:
+      tags: [Reports]
+      summary: List movements by period
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: from
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: to
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: reasonType
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Movement report
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MovementView'
+  /dashboard/alerts:
+    get:
+      tags: [Reports]
+      summary: Get stock and expiration alerts
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dashboard alerts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardAlertsView'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    ProductId:
+      in: path
+      name: productId
+      required: true
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    AuthResponse:
+      type: object
+      required: [accessToken, user]
+      properties:
+        accessToken:
+          type: string
+        user:
+          $ref: '#/components/schemas/UserView'
+    UserView:
+      type: object
+      required: [id, name, email, role]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [admin, employee]
+    CreateProductRequest:
+      type: object
+      required:
+        - sku
+        - name
+        - categoryId
+        - supplierId
+        - purchasePrice
+        - salePrice
+        - unitOfMeasure
+        - minimumStock
+        - tracksExpiration
+      properties:
+        sku:
+          type: string
+        name:
+          type: string
+        categoryId:
+          type: string
+          format: uuid
+        supplierId:
+          type: string
+          format: uuid
+        purchasePrice:
+          type: number
+        salePrice:
+          type: number
+        unitOfMeasure:
+          type: string
+        minimumStock:
+          type: number
+        tracksExpiration:
+          type: boolean
+    UpdateProductRequest:
+      allOf:
+        - $ref: '#/components/schemas/CreateProductRequest'
+    ProductView:
+      type: object
+      required: [id, sku, name, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        sku:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive]
+    ProductStockView:
+      allOf:
+        - $ref: '#/components/schemas/ProductView'
+        - type: object
+          properties:
+            availableQuantity:
+              type: number
+            minimumStock:
+              type: number
+            belowMinimum:
+              type: boolean
+            expiringWithinDays:
+              type: integer
+              enum: [15]
+            hasExpiredLots:
+              type: boolean
+    ProductDetailView:
+      allOf:
+        - $ref: '#/components/schemas/ProductStockView'
+        - type: object
+          properties:
+            lots:
+              type: array
+              items:
+                $ref: '#/components/schemas/LotView'
+    LotView:
+      type: object
+      required: [id, code, receivedQuantity, remainingQuantity, entryDate, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        receivedQuantity:
+          type: number
+        remainingQuantity:
+          type: number
+        entryDate:
+          type: string
+          format: date-time
+        expirationDate:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          type: string
+          enum: [available, depleted, expired, blocked]
+    CreateEntryRequest:
+      type: object
+      required: [productId, reasonType, quantity, entryDate]
+      properties:
+        productId:
+          type: string
+          format: uuid
+        reasonType:
+          type: string
+          enum: [supplier-purchase, restock, inventory-adjustment]
+        quantity:
+          type: number
+        entryDate:
+          type: string
+          format: date-time
+        expirationDate:
+          type: string
+          format: date-time
+          nullable: true
+        notes:
+          type: string
+    CreateExitRequest:
+      type: object
+      required: [productId, reasonType, quantity]
+      properties:
+        productId:
+          type: string
+          format: uuid
+        reasonType:
+          type: string
+          enum: [sale, loss, expiration, breakage]
+        quantity:
+          type: number
+        notes:
+          type: string
+    ExpiredReleaseRequest:
+      type: object
+      required: [productId, lotId, quantity, reason]
+      properties:
+        productId:
+          type: string
+          format: uuid
+        lotId:
+          type: string
+          format: uuid
+        quantity:
+          type: number
+        reason:
+          type: string
+    MovementView:
+      type: object
+      required:
+        - id
+        - productId
+        - movementType
+        - reasonType
+        - quantity
+        - occurredAt
+        - performedBy
+      properties:
+        id:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+        lotId:
+          type: string
+          format: uuid
+          nullable: true
+        movementType:
+          type: string
+        reasonType:
+          type: string
+        quantity:
+          type: number
+        notes:
+          type: string
+        occurredAt:
+          type: string
+          format: date-time
+        performedBy:
+          $ref: '#/components/schemas/UserView'
+        approvedBy:
+          $ref: '#/components/schemas/UserView'
+    DashboardAlertsView:
+      type: object
+      required: [belowMinimum, expiringSoon, expired]
+      properties:
+        belowMinimum:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductStockView'
+        expiringSoon:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductDetailView'
+        expired:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductDetailView'
