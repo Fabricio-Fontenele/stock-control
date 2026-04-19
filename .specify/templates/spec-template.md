@@ -95,10 +95,35 @@
 - **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
 - **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
 
+### Domain Rules & Invariants *(mandatory for business workflows)*
+
+<!--
+  ACTION REQUIRED: Capture the business rules that MUST stay centralized in the
+  domain or application model. Write these as invariant statements, not UI or DB
+  implementation notes.
+-->
+
+- **DR-001**: [Define how stock entry becomes valid and which data is mandatory]
+- **DR-002**: [Define when stock exit is allowed and what prevents invalid depletion]
+- **DR-003**: [Define whether expiration tracking applies and how expired stock is handled]
+- **DR-004**: [Define how minimum stock is calculated or evaluated]
+- **DR-005**: [Define any authorized exception flow such as adjustment, loss, or return]
+
 ### Key Entities *(include if feature involves data)*
 
-- **[Entity 1]**: [What it represents, key attributes without implementation]
-- **[Entity 2]**: [What it represents, relationships to other entities]
+- **[Entity 1]**: [Business meaning, identity, invariants, and relationships]
+- **[Entity 2]**: [Business meaning, identity, invariants, and relationships]
+
+### Use Cases & Boundaries *(mandatory for behavioral features)*
+
+<!--
+  ACTION REQUIRED: Map the behavior to the architecture. Each use case should
+  name the application action and clarify which layer owns the rule.
+-->
+
+- **UC-001**: [Use case name] owned by `application`, relying on [domain entities/services]
+- **UC-002**: [Use case name] owned by `application`, persisting through [repository/port]
+- **Boundary Note**: [Clarify what MUST remain outside interface and infrastructure layers]
 
 ## Success Criteria *(mandatory)*
 
@@ -126,3 +151,4 @@
 - [Assumption about scope boundaries, e.g., "Mobile support is out of scope for v1"]
 - [Assumption about data/environment, e.g., "Existing authentication system will be reused"]
 - [Dependency on existing system/service, e.g., "Requires access to the existing user profile API"]
+- [Assumption about stock policy, e.g., "Negative stock is forbidden except through authorized adjustment"]

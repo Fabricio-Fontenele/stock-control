@@ -8,7 +8,8 @@ description: "Task list template for feature implementation"
 **Input**: Design documents from `/specs/[###-feature-name]/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
-**Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification.
+**Tests**: Business-rule and use-case changes MUST include automated tests. Purely
+documentation-only or non-behavioral chores may omit them when justified.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
@@ -20,10 +21,10 @@ description: "Task list template for feature implementation"
 
 ## Path Conventions
 
-- **Single project**: `src/`, `tests/` at repository root
-- **Web app**: `backend/src/`, `frontend/src/`
-- **Mobile**: `api/src/`, `ios/src/` or `android/src/`
-- Paths shown below assume single project - adjust based on plan.md structure
+- **Layered single project**: `src/domain/`, `src/application/`,
+  `src/infrastructure/`, `src/interface/`, and `tests/` at repository root
+- Adjust paths based on `plan.md`, but preserve inward dependencies and keep
+  business rules out of interface and infrastructure files
 
 <!-- 
   ============================================================================
@@ -62,12 +63,12 @@ description: "Task list template for feature implementation"
 
 Examples of foundational tasks (adjust based on your project):
 
-- [ ] T004 Setup database schema and migrations framework
-- [ ] T005 [P] Implement authentication/authorization framework
-- [ ] T006 [P] Setup API routing and middleware structure
-- [ ] T007 Create base models/entities that all stories depend on
-- [ ] T008 Configure error handling and logging infrastructure
-- [ ] T009 Setup environment configuration management
+- [ ] T004 Define shared domain entities and value objects in `src/domain/`
+- [ ] T005 [P] Define repository and gateway ports in `src/application/ports/`
+- [ ] T006 [P] Setup interface entrypoints and request/response translation in `src/interface/`
+- [ ] T007 Implement persistence adapters in `src/infrastructure/`
+- [ ] T008 Centralize error handling and audit/logging for stock movements
+- [ ] T009 Setup environment and configuration management without leaking it into domain code
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -79,21 +80,22 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 1 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 1 ⚠️
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T010 [P] [US1] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T011 [P] [US1] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T010 [P] [US1] Domain invariant test for [rule] in `tests/unit/domain/test_[name].py`
+- [ ] T011 [P] [US1] Application/use-case test for [flow] in `tests/unit/application/test_[name].py`
+- [ ] T012 [P] [US1] Integration or contract test for [journey/endpoint] in `tests/integration/test_[name].py` or `tests/contract/test_[name].py`
 
 ### Implementation for User Story 1
 
-- [ ] T012 [P] [US1] Create [Entity1] model in src/models/[entity1].py
-- [ ] T013 [P] [US1] Create [Entity2] model in src/models/[entity2].py
-- [ ] T014 [US1] Implement [Service] in src/services/[service].py (depends on T012, T013)
-- [ ] T015 [US1] Implement [endpoint/feature] in src/[location]/[file].py
-- [ ] T016 [US1] Add validation and error handling
-- [ ] T017 [US1] Add logging for user story 1 operations
+- [ ] T013 [P] [US1] Create or refine [Entity1] in `src/domain/entities/[entity1].py`
+- [ ] T014 [P] [US1] Create or refine [Policy/ValueObject] in `src/domain/[location]/[name].py`
+- [ ] T015 [US1] Implement [UseCase] in `src/application/use-cases/[use_case].py` (depends on T013, T014)
+- [ ] T016 [US1] Implement repository or gateway adapter in `src/infrastructure/[location]/[file].py`
+- [ ] T017 [US1] Implement interface handler in `src/interface/[location]/[file].py`
+- [ ] T018 [US1] Add movement audit/logging and error translation without duplicating business rules
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -105,17 +107,19 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 2 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 2 ⚠️
 
-- [ ] T018 [P] [US2] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T019 [P] [US2] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T019 [P] [US2] Domain invariant test for [rule] in `tests/unit/domain/test_[name].py`
+- [ ] T020 [P] [US2] Application/use-case test for [flow] in `tests/unit/application/test_[name].py`
+- [ ] T021 [P] [US2] Integration or contract test for [journey/endpoint] in `tests/integration/test_[name].py` or `tests/contract/test_[name].py`
 
 ### Implementation for User Story 2
 
-- [ ] T020 [P] [US2] Create [Entity] model in src/models/[entity].py
-- [ ] T021 [US2] Implement [Service] in src/services/[service].py
-- [ ] T022 [US2] Implement [endpoint/feature] in src/[location]/[file].py
-- [ ] T023 [US2] Integrate with User Story 1 components (if needed)
+- [ ] T022 [P] [US2] Create or refine [Entity/Policy] in `src/domain/[location]/[name].py`
+- [ ] T023 [US2] Implement [UseCase] in `src/application/use-cases/[use_case].py`
+- [ ] T024 [US2] Implement infrastructure support in `src/infrastructure/[location]/[file].py`
+- [ ] T025 [US2] Implement interface handler in `src/interface/[location]/[file].py`
+- [ ] T026 [US2] Integrate with User Story 1 through stable application ports only
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -127,16 +131,18 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 3 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 3 ⚠️
 
-- [ ] T024 [P] [US3] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T025 [P] [US3] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T027 [P] [US3] Domain invariant test for [rule] in `tests/unit/domain/test_[name].py`
+- [ ] T028 [P] [US3] Application/use-case test for [flow] in `tests/unit/application/test_[name].py`
+- [ ] T029 [P] [US3] Integration or contract test for [journey/endpoint] in `tests/integration/test_[name].py` or `tests/contract/test_[name].py`
 
 ### Implementation for User Story 3
 
-- [ ] T026 [P] [US3] Create [Entity] model in src/models/[entity].py
-- [ ] T027 [US3] Implement [Service] in src/services/[service].py
-- [ ] T028 [US3] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T030 [P] [US3] Create or refine [Entity/Policy] in `src/domain/[location]/[name].py`
+- [ ] T031 [US3] Implement [UseCase] in `src/application/use-cases/[use_case].py`
+- [ ] T032 [US3] Implement infrastructure support in `src/infrastructure/[location]/[file].py`
+- [ ] T033 [US3] Implement interface handler in `src/interface/[location]/[file].py`
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -153,7 +159,7 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] TXXX [P] Documentation updates in docs/
 - [ ] TXXX Code cleanup and refactoring
 - [ ] TXXX Performance optimization across all stories
-- [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
+- [ ] TXXX [P] Additional unit tests for cross-cutting domain/application behavior in `tests/unit/`
 - [ ] TXXX Security hardening
 - [ ] TXXX Run quickstart.md validation
 
@@ -178,10 +184,10 @@ Examples of foundational tasks (adjust based on your project):
 
 ### Within Each User Story
 
-- Tests (if included) MUST be written and FAIL before implementation
-- Models before services
-- Services before endpoints
-- Core implementation before integration
+- Tests for business behavior MUST be written and FAIL before implementation
+- Domain rules before application orchestration
+- Application use cases before interface handlers
+- Infrastructure adapters must satisfy application ports, not define business rules
 - Story complete before moving to next priority
 
 ### Parallel Opportunities
@@ -198,13 +204,13 @@ Examples of foundational tasks (adjust based on your project):
 ## Parallel Example: User Story 1
 
 ```bash
-# Launch all tests for User Story 1 together (if tests requested):
-Task: "Contract test for [endpoint] in tests/contract/test_[name].py"
-Task: "Integration test for [user journey] in tests/integration/test_[name].py"
+# Launch all tests for User Story 1 together:
+Task: "Domain invariant test for [rule] in tests/unit/domain/test_[name].py"
+Task: "Application/use-case test for [flow] in tests/unit/application/test_[name].py"
 
-# Launch all models for User Story 1 together:
-Task: "Create [Entity1] model in src/models/[entity1].py"
-Task: "Create [Entity2] model in src/models/[entity2].py"
+# Launch domain modeling tasks for User Story 1 together:
+Task: "Create or refine [Entity1] in src/domain/entities/[entity1].py"
+Task: "Create or refine [Policy/ValueObject] in src/domain/[location]/[name].py"
 ```
 
 ---
@@ -245,6 +251,7 @@ With multiple developers:
 - [P] tasks = different files, no dependencies
 - [Story] label maps task to specific user story for traceability
 - Each user story should be independently completable and testable
+- Keep rule ownership explicit: domain/application for behavior, infrastructure/interface for adapters
 - Verify tests fail before implementing
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently

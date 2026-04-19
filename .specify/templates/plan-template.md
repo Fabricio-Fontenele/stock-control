@@ -31,7 +31,16 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- Domain model explicitly names the affected entities, value objects, and
+  invariants for product, category, supplier, stock movement, expiration, and
+  minimum-stock behavior.
+- Use cases are mapped to the application layer with clear inputs, outputs, and
+  orchestration responsibilities.
+- Business rules for entry, exit, expiration, and stock-threshold decisions stay
+  in domain or application code, not in interface or infrastructure adapters.
+- Planned dependencies point inward across domain, application, infrastructure,
+  and interface layers.
+- Tasks and tests cover any changed business invariant or stock movement contract.
 
 ## Project Structure
 
@@ -56,39 +65,34 @@ specs/[###-feature]/
 -->
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
+# Suggested layered structure for this project
 src/
-├── models/
-├── services/
-├── cli/
-└── lib/
+├── domain/
+│   ├── entities/
+│   ├── value-objects/
+│   ├── services/
+│   └── repositories/
+├── application/
+│   ├── use-cases/
+│   ├── dto/
+│   └── ports/
+├── infrastructure/
+│   ├── persistence/
+│   ├── repositories/
+│   └── gateways/
+└── interface/
+    ├── api/
+    ├── cli/
+    └── presenters/
 
 tests/
-├── contract/
+├── unit/
+│   ├── domain/
+│   └── application/
 ├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+│   ├── infrastructure/
+│   └── interface/
+└── contract/
 ```
 
 **Structure Decision**: [Document the selected structure and reference the real
@@ -101,4 +105,4 @@ directories captured above]
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
 | [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+| [e.g., Temporary rule in adapter] | [specific blocker] | [why centralizing in domain/application is not yet possible] |
