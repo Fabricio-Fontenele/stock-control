@@ -158,6 +158,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MovementView'
+  /inventory/adjustments:
+    post:
+      tags: [Inventory]
+      summary: Register admin inventory adjustment with direction
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InventoryAdjustmentRequest'
+      responses:
+        '201':
+          description: Adjustment registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovementView'
   /inventory/expired-release:
     post:
       tags: [Inventory]
@@ -401,6 +420,8 @@ components:
         productId:
           type: string
           format: uuid
+        lotCode:
+          type: string
         reasonType:
           type: string
           enum: [supplier-purchase, restock, inventory-adjustment]
@@ -415,6 +436,24 @@ components:
           nullable: true
         notes:
           type: string
+    InventoryAdjustmentRequest:
+      type: object
+      required: [productId, direction, quantity, reason]
+      properties:
+        productId:
+          type: string
+          format: uuid
+        direction:
+          type: string
+          enum: [entrada, saida]
+        quantity:
+          type: number
+        reason:
+          type: string
+        lotId:
+          type: string
+          format: uuid
+          nullable: true
     CreateExitRequest:
       type: object
       required: [productId, reasonType, quantity]

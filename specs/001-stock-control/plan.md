@@ -30,7 +30,7 @@ estoque no dominio e orquestracao nos casos de uso.
 **Target Platform**: Linux containers for local development and server deployment  
 **Project Type**: Layered web-service backend API  
 **Performance Goals**: 95% das consultas de saldo em ate 500 ms; registro de saida comum em ate 20 s para o usuario; relatorios gerenciais filtrados em ate 60 s de uso percebido  
-**Constraints**: Saldo negativo proibido; FEFO obrigatorio para lotes elegiveis; lote vencido bloqueado salvo liberacao administrativa auditavel; JWT com papeis Admin e Funcionario; PostgreSQL executado em ambiente Docker  
+**Constraints**: Saldo negativo proibido; FEFO obrigatorio para lotes elegiveis; lote vencido bloqueado salvo liberacao administrativa auditavel; Ajuste de Inventario administrativo com direcao explicita (`entrada` ou `saida`) e motivo obrigatorio; tentativas rejeitadas de movimentacao devem entrar na trilha de auditoria; imutabilidade de movimentacao definida na camada de dominio/aplicacao com reforco em adapters; JWT com papeis Admin e Funcionario; PostgreSQL executado em ambiente Docker  
 **Scale/Scope**: Operacao de uma conveniencia por implantacao, com catalogo de centenas a poucos milhares de produtos e historico crescente de movimentacoes auditaveis
 
 ## Constitution Check

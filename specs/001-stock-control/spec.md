@@ -2,7 +2,7 @@
 
 **Feature Branch**: `001-stock-control`  
 **Created**: 2026-04-19  
-**Status**: Draft  
+**Status**: Ready for Implementation  
 **Input**: User description: "Construa uma aplicacao de controle de estoque voltada para a conveniencia de um posto de gasolina."
 
 ## Clarifications
@@ -39,8 +39,9 @@ saldo negativo.
    mais proximo e mostra o saldo atualizado.
 2. **Given** um funcionario autenticado e um produto sem saldo suficiente,
    **When** ele tenta registrar uma saida, **Then** o sistema bloqueia a
-   operacao, informa que saldo negativo nao e permitido e mantem a rastreabilidade
-   da tentativa conforme a politica de auditoria aplicavel.
+   operacao, informa que saldo negativo nao e permitido e registra a tentativa
+   rejeitada na trilha de auditoria com usuario, data e hora, produto,
+   quantidade solicitada, tipo de operacao e motivo do bloqueio.
 3. **Given** um lote vencido associado a um produto, **When** um funcionario da
    pista tenta registrar uma venda com esse lote, **Then** o sistema bloqueia a
    saida comum e exige fluxo administrativo especifico para liberacao.
@@ -133,8 +134,14 @@ do estoque minimo, vencendo ou vencidos.
   entrada com quantidade, data de entrada e data de vencimento quando aplicavel.
 - **FR-004**: O sistema MUST registrar entradas de estoque com tipo de origem ao
   menos entre Compra de Fornecedor, Reposicao e Ajuste de Inventario.
+- **FR-004a**: O sistema MUST tratar Ajuste de Inventario como operacao
+  administrativa com direcao explicita (`entrada` ou `saida`), quantidade
+  positiva, motivo obrigatorio e autoria de usuario Admin (Escritorio).
 - **FR-005**: O sistema MUST registrar saidas de estoque com tipo de operacao ao
   menos entre Venda, Perda, Vencimento e Quebra.
+- **FR-005a**: O sistema MUST classificar Ajuste de Inventario como movimento de
+  entrada ou saida conforme a direcao informada no fluxo administrativo, sem
+  substituir os tipos operacionais comuns de saida.
 - **FR-006**: O sistema MUST atualizar o saldo automaticamente apos cada entrada
   ou saida confirmada.
 - **FR-006a**: O sistema MUST aplicar a politica FEFO nas saidas de produtos com
@@ -151,6 +158,9 @@ do estoque minimo, vencendo ou vencidos.
 - **FR-009**: O sistema MUST manter historico de auditoria para toda movimentacao
   com usuario responsavel, data e hora, produto, lote quando aplicavel,
   quantidade, tipo de operacao e observacao quando informada.
+- **FR-009a**: O sistema MUST registrar tentativas rejeitadas de movimentacao com
+  usuario responsavel, data e hora, produto, quantidade solicitada, tipo de
+  operacao e motivo do bloqueio para rastreabilidade operacional.
 - **FR-010**: O sistema MUST impedir exclusao sem rastreabilidade de qualquer
   movimentacao registrada.
 - **FR-011**: O sistema MUST destacar produtos e lotes vencidos e tambem aqueles
@@ -202,6 +212,9 @@ do estoque minimo, vencendo ou vencidos.
   executar, mas nao alteram as invariantes de estoque e auditoria.
 - **DR-009**: Ajuste de Inventario e uma operacao administrativa exclusiva do
   perfil Admin (Escritorio).
+- **DR-009a**: Ajuste de Inventario deve informar direcao (`entrada` ou `saida`)
+  e motivo explicito; quando a direcao for `saida`, a regra de bloqueio de saldo
+  negativo continua obrigatoria.
 - **DR-010**: O SKU identifica de forma permanente um unico produto ao longo de
   todo o historico do sistema e nao pode ser reatribuido a outro cadastro.
 
