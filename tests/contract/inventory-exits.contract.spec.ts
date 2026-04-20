@@ -9,6 +9,7 @@ import { BcryptPasswordHasher } from "../../src/infrastructure/security/password
 describe("contract /inventory/exits", () => {
   const app = buildApp({ logger: false });
   let productId = "";
+  let sku = "";
 
   beforeAll(async () => {
     await app.ready();
@@ -28,6 +29,7 @@ describe("contract /inventory/exits", () => {
       [randomUUID(), "Fornecedor Doces"]
     );
 
+    sku = `SKU-EXIT-${randomUUID()}`;
     productId = randomUUID();
 
     await pool.query(
@@ -37,14 +39,14 @@ describe("contract /inventory/exits", () => {
        ) VALUES ($1, $2, $3,
          (SELECT id FROM categories WHERE name = 'Doces' LIMIT 1),
          (SELECT id FROM suppliers WHERE name = 'Fornecedor Doces' LIMIT 1),
-         1, 2, 'un', 1, true, 'active', NOW(), NOW())
-       ON CONFLICT (sku) DO NOTHING`,
-      [productId, "SKU-EXIT-1", "Produto Exit Teste"]
+          1, 2, 'un', 1, true, 'active', NOW(), NOW())
+        ON CONFLICT (sku) DO NOTHING`,
+      [productId, sku, "Produto Exit Teste"]
     );
 
     const persistedProduct = await pool.query<{ id: string }>(
       "SELECT id FROM products WHERE sku = $1 LIMIT 1",
-      ["SKU-EXIT-1"]
+      [sku]
     );
     productId = persistedProduct.rows[0]?.id ?? productId;
 
@@ -77,7 +79,9 @@ describe("contract /inventory/exits", () => {
     await app.close();
   });
 
-  it("registers exit and returns MovementView contract shape", async () => {
+  it.each(["sale", "loss", "expiration", "breakage"] as const)(
+    "registers %s exit and returns MovementView contract shape",
+    async (reasonType) => {
     const loginResponse = await app.inject({
       method: "POST",
       url: "/auth/login",
@@ -98,7 +102,7 @@ describe("contract /inventory/exits", () => {
       payload: {
         productId,
         quantity: 2,
-        reasonType: "sale"
+        reasonType
       }
     });
 
@@ -107,10 +111,11 @@ describe("contract /inventory/exits", () => {
     expect(body).toMatchObject({
       productId,
       movementType: "exit",
-      reasonType: "sale",
+      reasonType,
       performedBy: {
         role: "admin"
       }
     });
-  });
+    }
+  );
 });

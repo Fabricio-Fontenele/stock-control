@@ -4,6 +4,7 @@ import { SearchStockUseCase } from "../../../application/use-cases/search-stock.
 import { RegisterQuickExitUseCase } from "../../../application/use-cases/register-quick-exit.use-case.js";
 import { RegisterStockEntryUseCase } from "../../../application/use-cases/register-stock-entry.use-case.js";
 import { RegisterInventoryAdjustmentUseCase } from "../../../application/use-cases/register-inventory-adjustment.use-case.js";
+import { ApproveExpiredReleaseUseCase } from "../../../application/use-cases/approve-expired-release.use-case.js";
 import { DeleteStockMovementUseCase } from "../../../application/use-cases/delete-stock-movement.use-case.js";
 import { PostgresStockRepository } from "../../../infrastructure/repositories/postgres-stock-repository.js";
 import { PostgresProductRepository } from "../../../infrastructure/repositories/postgres-product-repository.js";
@@ -11,6 +12,7 @@ import { PostgresMovementRepository } from "../../../infrastructure/repositories
 import { PostgresUnitOfWork } from "../../../infrastructure/persistence/postgres/postgres-unit-of-work.js";
 import {
   inventoryAdjustmentSchema,
+  expiredReleaseSchema,
   inventoryEntrySchema,
   inventoryExitSchema,
   inventorySearchQuerySchema
@@ -19,31 +21,15 @@ import {
   presentMovement,
   presentStockSnapshot
 } from "../../presenters/http-presenters.js";
-import { PostgresUserRepository } from "../../../infrastructure/repositories/postgres-user-repository.js";
 import { HttpError } from "../../../application/errors/http-error.js";
 
-const asRole = (role: unknown): "admin" | "employee" => {
-  if (role === "admin" || role === "employee") {
-    return role;
-  }
-
-  throw new HttpError(403, "Unsupported role");
-};
-
 const inventoryRoutes: FastifyPluginAsync = async (app) => {
-  app.post("/inventory/entries", { preHandler: app.authenticate }, async (request, reply) => {
+  app.post("/inventory/entries", { preHandler: app.ensureAdmin }, async (request, reply) => {
     const payload = inventoryEntrySchema.parse(request.body);
-    const user = request.user;
+    const currentUser = request.currentUser;
 
-    if (!user?.sub || !user?.role) {
+    if (!currentUser) {
       throw new HttpError(401, "Invalid authentication payload");
-    }
-
-    const userRepository = new PostgresUserRepository();
-    const performedByUser = await userRepository.findById(user.sub);
-
-    if (!performedByUser) {
-      throw new HttpError(401, "Authenticated user not found");
     }
 
     const useCase = new RegisterStockEntryUseCase({
@@ -58,39 +44,27 @@ const inventoryRoutes: FastifyPluginAsync = async (app) => {
       lotCode: payload.lotCode ?? null,
       quantity: payload.quantity,
       entryDate: payload.entryDate,
-      expirationDate: payload.expirationDate,
+      expirationDate: payload.expirationDate ?? null,
       reasonType: payload.reasonType,
       notes: payload.notes ?? null,
-      performedByUserId: user.sub,
-      performedByRole: asRole(user.role)
+      performedByUserId: currentUser.id,
+      performedByRole: currentUser.role
     });
 
-    const response = presentMovement(movement, {
-      id: performedByUser.id,
-      name: performedByUser.name,
-      email: performedByUser.email,
-      role: performedByUser.role
-    });
+    const response = presentMovement(movement, currentUser);
 
     return reply.status(201).send(response);
   });
 
   app.post(
     "/inventory/adjustments",
-    { preHandler: app.authenticate },
+    { preHandler: app.ensureAdmin },
     async (request, reply) => {
       const payload = inventoryAdjustmentSchema.parse(request.body);
-      const user = request.user;
+      const currentUser = request.currentUser;
 
-      if (!user?.sub || !user?.role) {
+      if (!currentUser) {
         throw new HttpError(401, "Invalid authentication payload");
-      }
-
-      const userRepository = new PostgresUserRepository();
-      const performedByUser = await userRepository.findById(user.sub);
-
-      if (!performedByUser) {
-        throw new HttpError(401, "Authenticated user not found");
       }
 
       const useCase = new RegisterInventoryAdjustmentUseCase({
@@ -106,16 +80,11 @@ const inventoryRoutes: FastifyPluginAsync = async (app) => {
         quantity: payload.quantity,
         reason: payload.reason,
         lotId: payload.lotId ?? null,
-        performedByUserId: user.sub,
-        performedByRole: asRole(user.role)
+        performedByUserId: currentUser.id,
+        performedByRole: currentUser.role
       });
 
-      const response = presentMovement(movement, {
-        id: performedByUser.id,
-        name: performedByUser.name,
-        email: performedByUser.email,
-        role: performedByUser.role
-      });
+      const response = presentMovement(movement, currentUser);
 
       return reply.status(201).send(response);
     }
@@ -133,11 +102,42 @@ const inventoryRoutes: FastifyPluginAsync = async (app) => {
     });
   });
 
+  app.post(
+    "/inventory/expired-release",
+    { preHandler: app.ensureAdmin },
+    async (request, reply) => {
+      const payload = expiredReleaseSchema.parse(request.body);
+      const currentUser = request.currentUser;
+
+      if (!currentUser) {
+        throw new HttpError(401, "Invalid authentication payload");
+      }
+
+      const useCase = new ApproveExpiredReleaseUseCase({
+        productRepository: new PostgresProductRepository(),
+        stockRepository: new PostgresStockRepository(),
+        movementRepository: new PostgresMovementRepository(),
+        unitOfWork: new PostgresUnitOfWork()
+      });
+
+      const movement = await useCase.execute({
+        productId: payload.productId,
+        lotId: payload.lotId,
+        quantity: payload.quantity,
+        reason: payload.reason,
+        performedByUserId: currentUser.id,
+        performedByRole: currentUser.role
+      });
+
+      return reply.status(201).send(presentMovement(movement, currentUser, currentUser));
+    }
+  );
+
   app.post("/inventory/exits", { preHandler: app.authenticate }, async (request, reply) => {
     const payload = inventoryExitSchema.parse(request.body);
-    const user = request.user;
+    const currentUser = request.currentUser;
 
-    if (!user?.sub || !user?.role) {
+    if (!currentUser) {
       throw new HttpError(401, "Invalid authentication payload");
     }
 
@@ -153,16 +153,9 @@ const inventoryRoutes: FastifyPluginAsync = async (app) => {
       quantity: payload.quantity,
       reasonType: payload.reasonType,
       notes: payload.notes ?? null,
-      performedByUserId: user.sub,
-      performedByRole: asRole(user.role)
+      performedByUserId: currentUser.id,
+      performedByRole: currentUser.role
     });
-
-    const userRepository = new PostgresUserRepository();
-    const performedByUser = await userRepository.findById(user.sub);
-
-    if (!performedByUser) {
-      throw new HttpError(401, "Authenticated user not found");
-    }
 
     const firstMovement = result.movements[0];
 
@@ -170,14 +163,12 @@ const inventoryRoutes: FastifyPluginAsync = async (app) => {
       throw new HttpError(409, "No movement generated for exit");
     }
 
-    const movementView = presentMovement(firstMovement, {
-      id: performedByUser.id,
-      name: performedByUser.name,
-      email: performedByUser.email,
-      role: performedByUser.role
-    });
+    const movementView = presentMovement(firstMovement, currentUser);
 
-    return reply.status(201).send(movementView);
+    return reply.status(201).send({
+      ...movementView,
+      movements: result.movements.map((movement) => presentMovement(movement, currentUser))
+    });
   });
 
   app.delete(

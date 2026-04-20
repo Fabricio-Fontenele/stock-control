@@ -9,6 +9,8 @@ import { BcryptPasswordHasher } from "../../../src/infrastructure/security/passw
 describe("integration quick-exit flow", () => {
   const app = buildApp({ logger: false });
   let productId = "";
+  let soonLotId = "";
+  let lateLotId = "";
 
   beforeAll(async () => {
     await app.ready();
@@ -28,6 +30,7 @@ describe("integration quick-exit flow", () => {
       [randomUUID(), "Fornecedor Snacks"]
     );
 
+    const sku = `SKU-INT-${randomUUID()}`;
     productId = randomUUID();
     await pool.query(
       `INSERT INTO products (
@@ -36,26 +39,28 @@ describe("integration quick-exit flow", () => {
        ) VALUES ($1, $2, $3,
          (SELECT id FROM categories WHERE name = 'Snacks' LIMIT 1),
          (SELECT id FROM suppliers WHERE name = 'Fornecedor Snacks' LIMIT 1),
-         1, 2, 'un', 1, true, 'active', NOW(), NOW())
-       ON CONFLICT (sku) DO NOTHING`,
-      [productId, "SKU-INT-1", "Produto Integracao"]
+          1, 2, 'un', 1, true, 'active', NOW(), NOW())
+        ON CONFLICT (sku) DO NOTHING`,
+      [productId, sku, "Produto Integracao"]
     );
 
     const persistedProduct = await pool.query<{ id: string }>(
       "SELECT id FROM products WHERE sku = $1 LIMIT 1",
-      ["SKU-INT-1"]
+      [sku]
     );
     productId = persistedProduct.rows[0]?.id ?? productId;
 
+    soonLotId = randomUUID();
+    lateLotId = randomUUID();
     await pool.query(
       `INSERT INTO stock_lots (
          id, product_id, code, received_quantity, remaining_quantity,
          entry_date, expiration_date, status, created_at, updated_at
        ) VALUES
-         ($1, $3, $4, 10, 10, CURRENT_DATE, CURRENT_DATE + INTERVAL '10 days', 'available', NOW(), NOW()),
-         ($2, $3, $5, 10, 10, CURRENT_DATE, CURRENT_DATE + INTERVAL '30 days', 'available', NOW(), NOW())
-       ON CONFLICT (id) DO NOTHING`,
-      [randomUUID(), randomUUID(), productId, "LOT-FEFO-SOON", "LOT-FEFO-LATE"]
+          ($1, $3, $4, 10, 10, CURRENT_DATE, CURRENT_DATE + INTERVAL '10 days', 'available', NOW(), NOW()),
+          ($2, $3, $5, 10, 10, CURRENT_DATE, CURRENT_DATE + INTERVAL '30 days', 'available', NOW(), NOW())
+        ON CONFLICT (id) DO NOTHING`,
+      [soonLotId, lateLotId, productId, "LOT-FEFO-SOON", "LOT-FEFO-LATE"]
     );
 
     const employeeEmail = "employee@conveniencia.local";
@@ -104,7 +109,7 @@ describe("integration quick-exit flow", () => {
 
     expect(firstExit.statusCode).toBe(201);
     const firstBody = firstExit.json();
-    expect(firstBody.lotId).toBeDefined();
+    expect(firstBody.lotId).toBe(soonLotId);
     expect(firstBody.movementType).toBe("exit");
 
     const tooMuchExit = await app.inject({
@@ -122,4 +127,36 @@ describe("integration quick-exit flow", () => {
 
     expect(tooMuchExit.statusCode).toBe(409);
   });
+
+  it.each(["sale", "loss", "expiration", "breakage"] as const)(
+    "supports quick-exit reason %s",
+    async (reasonType) => {
+      const login = await app.inject({
+        method: "POST",
+        url: "/auth/login",
+        payload: {
+          email: "admin@conveniencia.local",
+          password: "admin123"
+        }
+      });
+
+      const { accessToken } = login.json();
+
+      const response = await app.inject({
+        method: "POST",
+        url: "/inventory/exits",
+        headers: {
+          authorization: `Bearer ${accessToken}`
+        },
+        payload: {
+          productId,
+          quantity: 1,
+          reasonType
+        }
+      });
+
+      expect(response.statusCode).toBe(201);
+      expect(response.json().reasonType).toBe(reasonType);
+    }
+  );
 });

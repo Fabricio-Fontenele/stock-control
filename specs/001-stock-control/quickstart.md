@@ -46,6 +46,11 @@ auditoria.
     - a liberacao gera nova rastreabilidade
 12. Consulte relatorio por periodo e a trilha de auditoria completa.
 
+## Validation Status
+
+- Fluxo validado localmente em 2026-04-20 com PostgreSQL em Docker.
+- Suite automatizada executada com sucesso: `65/65` testes.
+
 ## Expected Checks
 
 - JWT diferencia corretamente `admin` e `employee`

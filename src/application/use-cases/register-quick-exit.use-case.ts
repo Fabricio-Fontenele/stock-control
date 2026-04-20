@@ -35,30 +35,31 @@ interface RegisterQuickExitDependencies {
 
 const ALLOWED_QUICK_EXIT_REASONS: StockMovementReason[] = ["sale", "loss", "expiration", "breakage"];
 const MOVEMENT_REASON_VALUES = Object.values(STOCK_MOVEMENT_REASON) as StockMovementReason[];
+const INSUFFICIENT_STOCK_MESSAGE = "Insufficient available balance for requested exit";
 
 export class RegisterQuickExitUseCase {
   constructor(private readonly deps: RegisterQuickExitDependencies) {}
 
   async execute(input: RegisterQuickExitInput): Promise<{ movements: StockMovement[] }> {
     if (input.quantity <= 0) {
-      await this.safeLogRejectedAttempt(input, "Exit quantity must be greater than zero");
+      await this.logRejectedAttemptOrFail(input, "Exit quantity must be greater than zero");
       throw new HttpError(400, "Exit quantity must be greater than zero");
     }
 
     if (!ALLOWED_QUICK_EXIT_REASONS.includes(input.reasonType)) {
-      await this.safeLogRejectedAttempt(input, "Quick exit reason is invalid");
+      await this.logRejectedAttemptOrFail(input, "Quick exit reason is invalid");
       throw new HttpError(400, "Quick exit reason is invalid");
     }
 
     const product = await this.deps.productRepository.findById(input.productId);
 
     if (!product) {
-      await this.safeLogRejectedAttempt(input, "Product not found");
+      await this.logRejectedAttemptOrFail(input, "Product not found");
       throw new HttpError(404, "Product not found");
     }
 
     if (product.status !== "active") {
-      await this.safeLogRejectedAttempt(input, "Inactive product cannot be used in common exits");
+      await this.logRejectedAttemptOrFail(input, "Inactive product cannot be used in common exits");
       throw new HttpError(409, "Inactive product cannot be used in common exits");
     }
 
@@ -102,21 +103,25 @@ export class RegisterQuickExitUseCase {
         return { movements };
       });
     } catch (error) {
-      await this.safeLogRejectedAttempt(input, error instanceof Error ? error.message : "Unknown rejection");
-
       if (error instanceof HttpError) {
+        await this.logRejectedAttemptOrFail(input, error.message);
         throw error;
       }
 
-      throw new HttpError(409, "Insufficient available stock or no eligible lot for exit");
+      if (error instanceof Error && error.message === INSUFFICIENT_STOCK_MESSAGE) {
+        await this.logRejectedAttemptOrFail(input, error.message);
+        throw new HttpError(409, "Insufficient available stock or no eligible lot for exit");
+      }
+
+      throw error;
     }
   }
 
-  private async safeLogRejectedAttempt(input: RegisterQuickExitInput, failureReason: string): Promise<void> {
+  private async logRejectedAttemptOrFail(input: RegisterQuickExitInput, failureReason: string): Promise<void> {
     try {
       await this.logRejectedAttempt(input, failureReason);
     } catch {
-      // Keep primary business error as source of truth.
+      throw new HttpError(500, "Failed to persist rejected movement audit trail");
     }
   }
 

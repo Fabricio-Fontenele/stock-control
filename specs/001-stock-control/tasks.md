@@ -109,20 +109,20 @@
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T032 [P] [US3] Add domain tests for permanent SKU uniqueness, inactive-product restrictions, and expired-release authorization in `tests/unit/domain/product.spec.ts` and `tests/unit/domain/stock-movement.spec.ts`
-- [ ] T033 [P] [US3] Add application tests for product management, movement reports, and expired-release approval in `tests/unit/application/manage-product.use-case.spec.ts`, `tests/unit/application/list-movements-report.use-case.spec.ts`, and `tests/unit/application/approve-expired-release.use-case.spec.ts`
-- [ ] T034 [P] [US3] Add API contract and integration tests for `/products`, `/products/{productId}`, `/products/{productId}/deactivate`, `/reports/movements`, and `/inventory/expired-release` in `tests/contract/products.contract.spec.ts`, `tests/contract/product-detail.contract.spec.ts`, `tests/contract/reports-movements.contract.spec.ts`, `tests/contract/inventory-expired-release.contract.spec.ts`, and `tests/integration/api/admin-management-flow.spec.ts`
+- [x] T032 [P] [US3] Add domain tests for permanent SKU uniqueness, inactive-product restrictions, and expired-release authorization in `tests/unit/domain/product.spec.ts` and `tests/unit/domain/stock-movement.spec.ts`
+- [x] T033 [P] [US3] Add application tests for product management, movement reports, and expired-release approval in `tests/unit/application/manage-product.use-case.spec.ts`, `tests/unit/application/list-movements-report.use-case.spec.ts`, and `tests/unit/application/approve-expired-release.use-case.spec.ts`
+- [x] T034 [P] [US3] Add API contract and integration tests for `/products`, `/products/{productId}`, `/products/{productId}/deactivate`, `/reports/movements`, and `/inventory/expired-release` in `tests/contract/products.contract.spec.ts`, `tests/contract/product-detail.contract.spec.ts`, `tests/contract/reports-movements.contract.spec.ts`, `tests/contract/inventory-expired-release.contract.spec.ts`, and `tests/integration/api/admin-management-flow.spec.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T035 [P] [US3] Implement product management use cases for create, update, list, detail, and deactivate flows in `src/application/use-cases/create-product.use-case.ts`, `src/application/use-cases/update-product.use-case.ts`, `src/application/use-cases/list-products.use-case.ts`, `src/application/use-cases/get-product-detail.use-case.ts`, and `src/application/use-cases/deactivate-product.use-case.ts`
-- [ ] T036 [P] [US3] Implement reporting and expired-release approval use cases in `src/application/use-cases/list-movements-report.use-case.ts` and `src/application/use-cases/approve-expired-release.use-case.ts`
-- [ ] T037 [US3] Extend repository adapters for SKU reservation, product filters, movement report queries, and expired-release persistence in `src/infrastructure/repositories/postgres-product-repository.ts`, `src/infrastructure/repositories/postgres-movement-repository.ts`, and `src/infrastructure/repositories/postgres-stock-repository.ts`
-- [ ] T038 [US3] Implement product, reporting, and expired-release HTTP routes in `src/interface/api/routes/product-routes.ts`, `src/interface/api/routes/report-routes.ts`, and `src/interface/api/routes/inventory-routes.ts`
-- [ ] T039 [US3] Wire product, dashboard, and report routes into the application composition root in `src/app.ts`
-- [ ] T047 [P] [US3] Add application and API tests for category and supplier management in `tests/unit/application/manage-categories-suppliers.use-case.spec.ts`, `tests/contract/categories.contract.spec.ts`, and `tests/contract/suppliers.contract.spec.ts`
-- [ ] T048 [P] [US3] Implement category and supplier management use cases in `src/application/use-cases/create-category.use-case.ts`, `src/application/use-cases/update-category.use-case.ts`, `src/application/use-cases/list-categories.use-case.ts`, `src/application/use-cases/create-supplier.use-case.ts`, `src/application/use-cases/update-supplier.use-case.ts`, and `src/application/use-cases/list-suppliers.use-case.ts`
-- [ ] T049 [US3] Implement category and supplier HTTP routes and app wiring in `src/interface/api/routes/category-routes.ts`, `src/interface/api/routes/supplier-routes.ts`, and `src/app.ts`
+- [x] T035 [P] [US3] Implement product management use cases for create, update, list, detail, and deactivate flows in `src/application/use-cases/create-product.use-case.ts`, `src/application/use-cases/update-product.use-case.ts`, `src/application/use-cases/list-products.use-case.ts`, `src/application/use-cases/get-product-detail.use-case.ts`, and `src/application/use-cases/deactivate-product.use-case.ts`
+- [x] T036 [P] [US3] Implement reporting and expired-release approval use cases in `src/application/use-cases/list-movements-report.use-case.ts` and `src/application/use-cases/approve-expired-release.use-case.ts`
+- [x] T037 [US3] Extend repository adapters for SKU reservation, product filters, movement report queries, and expired-release persistence in `src/infrastructure/repositories/postgres-product-repository.ts`, `src/infrastructure/repositories/postgres-movement-repository.ts`, and `src/infrastructure/repositories/postgres-stock-repository.ts`
+- [x] T038 [US3] Implement product, reporting, and expired-release HTTP routes in `src/interface/api/routes/product-routes.ts`, `src/interface/api/routes/report-routes.ts`, and `src/interface/api/routes/inventory-routes.ts`
+- [x] T039 [US3] Wire product, dashboard, and report routes into the application composition root in `src/app.ts`
+- [x] T047 [P] [US3] Add application and API tests for category and supplier management in `tests/unit/application/manage-categories-suppliers.use-case.spec.ts`, `tests/contract/categories.contract.spec.ts`, and `tests/contract/suppliers.contract.spec.ts`
+- [x] T048 [P] [US3] Implement category and supplier management use cases in `src/application/use-cases/create-category.use-case.ts`, `src/application/use-cases/update-category.use-case.ts`, `src/application/use-cases/list-categories.use-case.ts`, `src/application/use-cases/create-supplier.use-case.ts`, `src/application/use-cases/update-supplier.use-case.ts`, and `src/application/use-cases/list-suppliers.use-case.ts`
+- [x] T049 [US3] Implement category and supplier HTTP routes and app wiring in `src/interface/api/routes/category-routes.ts`, `src/interface/api/routes/supplier-routes.ts`, and `src/app.ts`
 
 **Checkpoint**: All user stories are independently functional with admin management and reporting complete
 
@@ -133,8 +133,8 @@
 **Purpose**: Finish documentation, operational hardening, and full-scenario validation across stories.
 
 - [ ] T040 [P] Add request logging, security headers, and JWT error hardening in `src/interface/api/plugins/error-handler.ts` and `src/app.ts`
-- [ ] T041 [P] Document local setup, seed flow, and API usage in `README.md`
-- [ ] T042 Run the end-to-end quickstart validation and record any missing setup details in `specs/001-stock-control/quickstart.md`
+- [x] T041 [P] Document local setup, seed flow, and API usage in `README.md`
+- [x] T042 Run the end-to-end quickstart validation and record any missing setup details in `specs/001-stock-control/quickstart.md`
 
 ---
 

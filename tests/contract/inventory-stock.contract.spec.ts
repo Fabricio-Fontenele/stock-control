@@ -8,6 +8,7 @@ import { BcryptPasswordHasher } from "../../src/infrastructure/security/password
 
 describe("contract /inventory/stock", () => {
   const app = buildApp({ logger: false });
+  let sku = "";
 
   beforeAll(async () => {
     await app.ready();
@@ -17,6 +18,9 @@ describe("contract /inventory/stock", () => {
     const supplierId = randomUUID();
     const productId = randomUUID();
     const lotId = randomUUID();
+    const blockedLotId = randomUUID();
+    const expiredLotId = randomUUID();
+    sku = `SKU-STOCK-${randomUUID()}`;
 
     await pool.query(
       `INSERT INTO categories (id, name, description, created_at, updated_at)
@@ -39,14 +43,14 @@ describe("contract /inventory/stock", () => {
        ) VALUES ($1, $2, $3,
          (SELECT id FROM categories WHERE name = 'Bebidas' LIMIT 1),
          (SELECT id FROM suppliers WHERE name = 'Fornecedor Teste' LIMIT 1),
-         1, 2, 'un', 5, true, 'active', NOW(), NOW())
-       ON CONFLICT (sku) DO NOTHING`,
-      [productId, "SKU-STOCK-1", "Produto Stock Teste"]
+          1, 2, 'un', 5, true, 'active', NOW(), NOW())
+        ON CONFLICT (sku) DO NOTHING`,
+      [productId, sku, "Produto Stock Teste"]
     );
 
     const persistedProduct = await pool.query<{ id: string }>(
       "SELECT id FROM products WHERE sku = $1 LIMIT 1",
-      ["SKU-STOCK-1"]
+      [sku]
     );
 
     await pool.query(
@@ -54,9 +58,29 @@ describe("contract /inventory/stock", () => {
          id, product_id, code, received_quantity, remaining_quantity,
          entry_date, expiration_date, status, created_at, updated_at
        ) VALUES ($1, $2, $3, 10, 10, CURRENT_DATE, CURRENT_DATE + INTERVAL '30 days',
-         'available', NOW(), NOW())
-       ON CONFLICT (id) DO NOTHING`,
+          'available', NOW(), NOW())
+        ON CONFLICT (id) DO NOTHING`,
       [lotId, persistedProduct.rows[0]?.id, "LOT-STOCK-1"]
+    );
+
+    await pool.query(
+      `INSERT INTO stock_lots (
+         id, product_id, code, received_quantity, remaining_quantity,
+         entry_date, expiration_date, status, created_at, updated_at
+       ) VALUES ($1, $2, $3, 7, 7, CURRENT_DATE, CURRENT_DATE + INTERVAL '40 days',
+         'blocked', NOW(), NOW())
+       ON CONFLICT (id) DO NOTHING`,
+      [blockedLotId, persistedProduct.rows[0]?.id, "LOT-STOCK-BLOCKED"]
+    );
+
+    await pool.query(
+      `INSERT INTO stock_lots (
+         id, product_id, code, received_quantity, remaining_quantity,
+         entry_date, expiration_date, status, created_at, updated_at
+       ) VALUES ($1, $2, $3, 8, 8, CURRENT_DATE - INTERVAL '90 days', CURRENT_DATE - INTERVAL '60 days',
+         'expired', NOW(), NOW())
+       ON CONFLICT (id) DO NOTHING`,
+      [expiredLotId, persistedProduct.rows[0]?.id, "LOT-STOCK-EXPIRED"]
     );
 
     const employeeEmail = "employee@conveniencia.local";
@@ -92,7 +116,7 @@ describe("contract /inventory/stock", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/inventory/stock?search=SKU-STOCK-1",
+      url: `/inventory/stock?search=${sku}`,
       headers: {
         authorization: `Bearer ${accessToken}`
       }
@@ -101,9 +125,14 @@ describe("contract /inventory/stock", () => {
     expect(response.statusCode).toBe(200);
     const body = response.json();
     expect(Array.isArray(body.items)).toBe(true);
-    expect(body.items[0]).toMatchObject({
-      sku: "SKU-STOCK-1",
-      status: "active"
+
+    const target = body.items.find((item: { sku: string }) => item.sku === sku);
+    expect(target).toBeDefined();
+    expect(target).toMatchObject({
+      sku,
+      status: "active",
+      availableQuantity: 10,
+      hasExpiredLots: true
     });
   });
 });

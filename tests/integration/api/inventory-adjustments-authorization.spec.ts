@@ -80,4 +80,33 @@ describe("integration inventory adjustments authorization", () => {
     expect(response.statusCode).toBe(201);
     expect(response.json().reasonType).toBe("inventory-adjustment");
   });
+
+  it("blocks employee inventory adjustment", async () => {
+    const login = await app.inject({
+      method: "POST",
+      url: "/auth/login",
+      payload: {
+        email: "employee@conveniencia.local",
+        password: "employee123"
+      }
+    });
+
+    const { accessToken } = login.json();
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/inventory/adjustments",
+      headers: {
+        authorization: `Bearer ${accessToken}`
+      },
+      payload: {
+        productId,
+        direction: "entrada",
+        quantity: 2,
+        reason: "Ajuste proibido"
+      }
+    });
+
+    expect(response.statusCode).toBe(403);
+  });
 });

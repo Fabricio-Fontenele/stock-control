@@ -44,3 +44,24 @@ export const ensureProductMinimumStock = (value: number): number => {
 export const isProductActive = (product: Product): boolean => {
   return product.status === PRODUCT_STATUS.ACTIVE;
 };
+
+export const ensureProductSkuReservation = (
+  existingProduct: Pick<Product, "id"> | null,
+  currentProductId?: string
+): void => {
+  if (!existingProduct) {
+    return;
+  }
+
+  if (currentProductId && existingProduct.id === currentProductId) {
+    return;
+  }
+
+  throw new Error("Product SKU is already reserved");
+};
+
+export const ensureProductActiveForCommonOperation = (product: Pick<Product, "status">): void => {
+  if (product.status !== PRODUCT_STATUS.ACTIVE) {
+    throw new Error("Inactive product cannot be used in common operations");
+  }
+};

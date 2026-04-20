@@ -205,6 +205,7 @@ export class PostgresStockRepository implements StockRepository {
       WHERE
         product_id = $1
         AND remaining_quantity > 0
+        AND status <> 'blocked'
         AND (expiration_date IS NULL OR expiration_date >= $2::date)
       ORDER BY COALESCE(expiration_date, DATE '9999-12-31') ASC, entry_date ASC
       `,
@@ -222,7 +223,15 @@ export class PostgresStockRepository implements StockRepository {
       WITH lot_rollup AS (
         SELECT
           l.product_id,
-          COALESCE(SUM(l.remaining_quantity), 0) AS available_quantity,
+          COALESCE(SUM(
+            CASE
+              WHEN l.remaining_quantity > 0
+                AND (l.expiration_date IS NULL OR l.expiration_date >= $2::date)
+                AND l.status <> 'blocked'
+              THEN l.remaining_quantity
+              ELSE 0
+            END
+          ), 0) AS available_quantity,
           MIN(l.expiration_date) FILTER (
             WHERE l.expiration_date IS NOT NULL AND l.expiration_date >= $2::date
           ) AS next_expiration_date,
@@ -340,7 +349,15 @@ export class PostgresStockRepository implements StockRepository {
       WITH stock_summary AS (
         SELECT
           product_id,
-          COALESCE(SUM(remaining_quantity), 0) AS available_quantity
+          COALESCE(SUM(
+            CASE
+              WHEN remaining_quantity > 0
+                AND (expiration_date IS NULL OR expiration_date >= $1::date)
+                AND status <> 'blocked'
+              THEN remaining_quantity
+              ELSE 0
+            END
+          ), 0) AS available_quantity
         FROM stock_lots
         GROUP BY product_id
       )
@@ -382,7 +399,15 @@ export class PostgresStockRepository implements StockRepository {
       WITH stock_summary AS (
         SELECT
           product_id,
-          COALESCE(SUM(remaining_quantity), 0) AS available_quantity
+          COALESCE(SUM(
+            CASE
+              WHEN remaining_quantity > 0
+                AND (expiration_date IS NULL OR expiration_date >= $1::date)
+                AND status <> 'blocked'
+              THEN remaining_quantity
+              ELSE 0
+            END
+          ), 0) AS available_quantity
         FROM stock_lots
         GROUP BY product_id
       )

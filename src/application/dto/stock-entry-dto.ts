@@ -4,7 +4,7 @@ export interface RegisterStockEntryInput {
   quantity: number;
   entryDate: Date;
   expirationDate: Date | null;
-  reasonType: "supplier-purchase" | "restock" | "inventory-adjustment";
+  reasonType: "supplier-purchase" | "restock";
   notes: string | null;
   performedByUserId: string;
   performedByRole: "admin" | "employee";

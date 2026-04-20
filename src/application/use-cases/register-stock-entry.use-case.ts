@@ -28,8 +28,7 @@ interface RegisterStockEntryDependencies {
 
 const ENTRY_REASONS = [
   STOCK_MOVEMENT_REASON.SUPPLIER_PURCHASE,
-  STOCK_MOVEMENT_REASON.RESTOCK,
-  STOCK_MOVEMENT_REASON.INVENTORY_ADJUSTMENT
+  STOCK_MOVEMENT_REASON.RESTOCK
 ] as const;
 
 export class RegisterStockEntryUseCase {
@@ -58,10 +57,17 @@ export class RegisterStockEntryUseCase {
       throw new HttpError(409, "Inactive product cannot receive common entries");
     }
 
-    const expirationDate = ensureExpirationDateWhenRequired(
-      product.tracksExpiration,
-      input.expirationDate
-    );
+    let expirationDate: Date | null;
+
+    try {
+      expirationDate = ensureExpirationDateWhenRequired(product.tracksExpiration, input.expirationDate);
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new HttpError(400, error.message);
+      }
+
+      throw error;
+    }
 
     const now = new Date();
 

@@ -173,4 +173,53 @@ describe("RegisterQuickExitUseCase", () => {
 
     expect(movementRepository.createRejectedAttempt).toHaveBeenCalledTimes(1);
   });
+
+  it("returns internal error when rejected-attempt audit cannot be persisted", async () => {
+    const movementRepository = createMovementRepository();
+    (movementRepository.createRejectedAttempt as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+      new Error("audit write failed")
+    );
+
+    const useCase = new RegisterQuickExitUseCase({
+      productRepository: createProductRepository(),
+      stockRepository: createStockRepository([]),
+      movementRepository,
+      unitOfWork: createUnitOfWork()
+    });
+
+    await expect(
+      useCase.execute({
+        productId: "product-1",
+        quantity: 0,
+        reasonType: "sale",
+        notes: null,
+        performedByUserId: "user-1",
+        performedByRole: "employee"
+      })
+    ).rejects.toThrow("Failed to persist rejected movement audit trail");
+  });
+
+  it("does not map infrastructure failures to business conflict", async () => {
+    const useCase = new RegisterQuickExitUseCase({
+      productRepository: createProductRepository(),
+      stockRepository: createStockRepository([createStockLot({ id: "lot-1" })]),
+      movementRepository: createMovementRepository(),
+      unitOfWork: {
+        runInTransaction: async () => {
+          throw new Error("db unavailable");
+        }
+      }
+    });
+
+    await expect(
+      useCase.execute({
+        productId: "product-1",
+        quantity: 1,
+        reasonType: "sale",
+        notes: null,
+        performedByUserId: "user-1",
+        performedByRole: "employee"
+      })
+    ).rejects.toThrow("db unavailable");
+  });
 });

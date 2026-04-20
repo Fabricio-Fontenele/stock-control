@@ -18,6 +18,16 @@ const run = async (): Promise<void> => {
   const password = process.env.SEED_ADMIN_PASSWORD ?? DEFAULT_ADMIN_PASSWORD;
   const name = process.env.SEED_ADMIN_NAME ?? DEFAULT_ADMIN_NAME;
 
+  if (
+    process.env.NODE_ENV === "production" &&
+    password === DEFAULT_ADMIN_PASSWORD &&
+    process.env.ALLOW_INSECURE_SEED !== "true"
+  ) {
+    throw new Error(
+      "Refusing to seed admin with default password in production. Set SEED_ADMIN_PASSWORD or ALLOW_INSECURE_SEED=true explicitly."
+    );
+  }
+
   try {
     const existing = await pool.query<{ id: string }>(
       "SELECT id FROM users WHERE LOWER(email) = LOWER($1) LIMIT 1",

@@ -40,3 +40,21 @@ export const ensureMovementQuantity = (value: number): number => {
 
   return value;
 };
+
+export const ensureExpiredReleaseAuthorization = (params: {
+  performedByRole: "admin" | "employee";
+  reason: string;
+  approvedByUserId: string | null;
+}): void => {
+  if (params.performedByRole !== "admin") {
+    throw new Error("Only admin users can approve expired release");
+  }
+
+  if (!params.reason.trim()) {
+    throw new Error("Expired release reason is required");
+  }
+
+  if (!params.approvedByUserId) {
+    throw new Error("Expired release approval user is required");
+  }
+};
