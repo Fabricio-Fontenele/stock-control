@@ -1,10 +1,10 @@
 import { z } from "zod";
 
 export const productCreateSchema = z.object({
-  sku: z.string().trim().min(1),
+  sku: z.string().trim().min(1).optional(),
   name: z.string().trim().min(1),
   categoryId: z.string().uuid(),
-  supplierId: z.string().uuid(),
+  supplierId: z.string().uuid().nullable().optional(),
   purchasePrice: z.number().positive(),
   salePrice: z.number().positive(),
   unitOfMeasure: z.string().trim().min(1),
@@ -12,7 +12,9 @@ export const productCreateSchema = z.object({
   tracksExpiration: z.boolean()
 });
 
-export const productUpdateSchema = productCreateSchema.partial();
+export const productUpdateSchema = productCreateSchema.extend({
+  sku: z.string().trim().min(1).optional()
+}).partial();
 
 export const productListQuerySchema = z.object({
   search: z.string().trim().min(1).optional(),
@@ -21,4 +23,8 @@ export const productListQuerySchema = z.object({
 
 export const productIdParamSchema = z.object({
   productId: z.string().uuid()
+});
+
+export const nextProductSkuResponseSchema = z.object({
+  sku: z.string().trim().min(1)
 });

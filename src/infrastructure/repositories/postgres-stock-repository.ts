@@ -27,6 +27,9 @@ interface SnapshotRow {
   product_id: string;
   sku: string;
   product_name: string;
+  unit_of_measure: string;
+  sale_price: string;
+  updated_at: Date;
   status: "active" | "inactive";
   minimum_stock: string;
   available_quantity: string;
@@ -215,8 +218,9 @@ export class PostgresStockRepository implements StockRepository {
     return result.rows.map(mapLot);
   }
 
-  async searchProductStock(query: string, referenceDate: Date = new Date()): Promise<ProductStockSnapshot[]> {
-    const term = `%${query.trim()}%`;
+  async searchProductStock(query?: string, referenceDate: Date = new Date()): Promise<ProductStockSnapshot[]> {
+    const normalizedQuery = query?.trim();
+    const term = normalizedQuery ? `%${normalizedQuery}%` : null;
 
     const result: QueryResult<SnapshotRow> = await this.query(
       `
@@ -249,6 +253,9 @@ export class PostgresStockRepository implements StockRepository {
         p.id AS product_id,
         p.sku,
         p.name AS product_name,
+        p.unit_of_measure,
+        p.sale_price,
+        p.updated_at,
         p.status,
         p.minimum_stock,
         COALESCE(lr.available_quantity, 0) AS available_quantity,
@@ -257,7 +264,8 @@ export class PostgresStockRepository implements StockRepository {
         COALESCE(lr.expiring_lot_count, 0) AS expiring_lot_count
       FROM products p
       LEFT JOIN lot_rollup lr ON lr.product_id = p.id
-      WHERE (p.sku ILIKE $1 OR p.name ILIKE $1) AND p.status = 'active'
+      WHERE p.status = 'active'
+        AND ($1::text IS NULL OR p.sku ILIKE $1 OR p.name ILIKE $1)
       ORDER BY p.name ASC
       `,
       [term, referenceDate, EXPIRING_WINDOW_DAYS]
@@ -271,6 +279,9 @@ export class PostgresStockRepository implements StockRepository {
         productId: row.product_id,
         sku: row.sku,
         productName: row.product_name,
+        unitOfMeasure: row.unit_of_measure,
+        salePrice: Number(row.sale_price),
+        updatedAt: row.updated_at,
         status: row.status,
         availableQuantity,
         minimumStock,
@@ -314,6 +325,9 @@ export class PostgresStockRepository implements StockRepository {
         p.id AS product_id,
         p.sku,
         p.name AS product_name,
+        p.unit_of_measure,
+        p.sale_price,
+        p.updated_at,
         p.status,
         p.minimum_stock,
         COALESCE(lr.available_quantity, 0) AS available_quantity,
@@ -333,6 +347,9 @@ export class PostgresStockRepository implements StockRepository {
       productId: row.product_id,
       sku: row.sku,
       productName: row.product_name,
+      unitOfMeasure: row.unit_of_measure,
+      salePrice: Number(row.sale_price),
+      updatedAt: row.updated_at,
       status: row.status,
       availableQuantity: Number(row.available_quantity),
       minimumStock: Number(row.minimum_stock),

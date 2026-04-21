@@ -2,6 +2,9 @@ export interface ProductStockSnapshotDto {
   productId: string;
   sku: string;
   productName: string;
+  unitOfMeasure: string;
+  salePrice: number;
+  updatedAt: Date;
   status: "active" | "inactive";
   availableQuantity: number;
   minimumStock: number;

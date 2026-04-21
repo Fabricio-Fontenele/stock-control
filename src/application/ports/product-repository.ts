@@ -10,5 +10,8 @@ export interface ProductRepository {
   update(product: Product): Promise<void>;
   findById(id: ProductId): Promise<Product | null>;
   findBySku(sku: ProductSku): Promise<Product | null>;
+  previewNextGeneratedSku(): Promise<ProductSku>;
+  nextGeneratedSku(): Promise<ProductSku>;
+  syncGeneratedSkuSequence(sku: ProductSku): Promise<void>;
   list(filter?: ProductFilter): Promise<Product[]>;
 }

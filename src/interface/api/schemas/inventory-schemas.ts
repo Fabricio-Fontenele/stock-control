@@ -36,7 +36,7 @@ export const expiredReleaseSchema = z.object({
 });
 
 export const inventorySearchQuerySchema = z.object({
-  search: z.string().min(1)
+  search: z.string().trim().min(1).optional()
 });
 
 export type InventoryEntryRequest = z.infer<typeof inventoryEntrySchema>;

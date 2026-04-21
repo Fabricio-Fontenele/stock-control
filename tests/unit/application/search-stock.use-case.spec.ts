@@ -18,6 +18,9 @@ describe("SearchStockUseCase", () => {
           productId: "p1",
           sku: "SKU-1",
           productName: "Product 1",
+          unitOfMeasure: "un",
+          salePrice: 4.5,
+          updatedAt: new Date("2026-05-01T10:00:00.000Z"),
           status: "active",
           availableQuantity: 20,
           minimumStock: 5,
@@ -37,6 +40,9 @@ describe("SearchStockUseCase", () => {
         productId: "p1",
         sku: "SKU-1",
         productName: "Product 1",
+        unitOfMeasure: "un",
+        salePrice: 4.5,
+        updatedAt: new Date("2026-05-01T10:00:00.000Z"),
         status: "active",
         availableQuantity: 20,
         minimumStock: 5,
@@ -47,5 +53,23 @@ describe("SearchStockUseCase", () => {
       }
     ]);
     expect(stockRepository.searchProductStock).toHaveBeenCalledWith("SKU-1");
+  });
+
+  it("lists stock even without a search term", async () => {
+    const stockRepository: StockRepository = {
+      createLot: vi.fn(),
+      updateLot: vi.fn(),
+      findLotsByProduct: vi.fn(),
+      findEligibleLotsByProduct: vi.fn(),
+      findBelowMinimumProducts: vi.fn(),
+      findExpiringLots: vi.fn(),
+      findExpiredLots: vi.fn(),
+      searchProductStock: vi.fn().mockResolvedValue([])
+    };
+
+    const useCase = new SearchStockUseCase({ stockRepository });
+    await useCase.execute();
+
+    expect(stockRepository.searchProductStock).toHaveBeenCalledWith(undefined);
   });
 });

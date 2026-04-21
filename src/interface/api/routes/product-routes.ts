@@ -5,6 +5,7 @@ import { UpdateProductUseCase } from "../../../application/use-cases/update-prod
 import { ListProductsUseCase } from "../../../application/use-cases/list-products.use-case.js";
 import { GetProductDetailUseCase } from "../../../application/use-cases/get-product-detail.use-case.js";
 import { DeactivateProductUseCase } from "../../../application/use-cases/deactivate-product.use-case.js";
+import { ReactivateProductUseCase } from "../../../application/use-cases/reactivate-product.use-case.js";
 import { PostgresProductRepository } from "../../../infrastructure/repositories/postgres-product-repository.js";
 import { PostgresCategoryRepository } from "../../../infrastructure/repositories/postgres-category-repository.js";
 import { PostgresSupplierRepository } from "../../../infrastructure/repositories/postgres-supplier-repository.js";
@@ -18,6 +19,13 @@ import {
 import { presentProduct, presentProductDetail } from "../../presenters/http-presenters.js";
 
 const productRoutes: FastifyPluginAsync = async (app) => {
+  app.get("/products/next-sku", { preHandler: app.ensureAdmin }, async (_request, reply) => {
+    const productRepository = new PostgresProductRepository();
+    const sku = await productRepository.previewNextGeneratedSku();
+
+    return reply.status(200).send({ sku });
+  });
+
   app.get("/products", { preHandler: app.ensureAdmin }, async (request, reply) => {
     const query = productListQuerySchema.parse(request.query);
     const useCase = new ListProductsUseCase({
@@ -42,7 +50,17 @@ const productRoutes: FastifyPluginAsync = async (app) => {
       supplierRepository: new PostgresSupplierRepository()
     });
 
-    const product = await useCase.execute(payload);
+    const product = await useCase.execute({
+      ...(payload.sku !== undefined ? { sku: payload.sku } : {}),
+      name: payload.name,
+      categoryId: payload.categoryId,
+      supplierId: payload.supplierId ?? null,
+      purchasePrice: payload.purchasePrice,
+      salePrice: payload.salePrice,
+      unitOfMeasure: payload.unitOfMeasure,
+      minimumStock: payload.minimumStock,
+      tracksExpiration: payload.tracksExpiration
+    });
     return reply.status(201).send(presentProduct(product));
   });
 
@@ -90,6 +108,20 @@ const productRoutes: FastifyPluginAsync = async (app) => {
     async (request, reply) => {
       const params = productIdParamSchema.parse(request.params);
       const useCase = new DeactivateProductUseCase({
+        productRepository: new PostgresProductRepository()
+      });
+
+      const product = await useCase.execute(params.productId);
+      return reply.status(200).send(presentProduct(product));
+    }
+  );
+
+  app.post(
+    "/products/:productId/reactivate",
+    { preHandler: app.ensureAdmin },
+    async (request, reply) => {
+      const params = productIdParamSchema.parse(request.params);
+      const useCase = new ReactivateProductUseCase({
         productRepository: new PostgresProductRepository()
       });
 

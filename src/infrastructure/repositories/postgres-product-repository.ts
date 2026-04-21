@@ -1,7 +1,9 @@
 import type { QueryResult } from "pg";
 
 import {
+  buildGeneratedProductSku,
   PRODUCT_STATUS,
+  parseGeneratedProductSkuSequence,
   type Product,
   ensureProductMinimumStock,
   ensureProductSku
@@ -14,7 +16,7 @@ interface ProductRow {
   sku: string;
   name: string;
   category_id: string;
-  supplier_id: string;
+  supplier_id: string | null;
   purchase_price: string;
   sale_price: string;
   unit_of_measure: string;
@@ -41,8 +43,38 @@ const mapProductRow = (row: ProductRow): Product => ({
   updatedAt: row.updated_at
 });
 
+const GENERATED_SKU_PATTERN_SQL = "^[0-9]+$";
+
 export class PostgresProductRepository implements ProductRepository {
   private readonly pool = getPostgresPool();
+
+  private async ensureGeneratedSkuSequenceReady(): Promise<void> {
+    await this.pool.query(`CREATE SEQUENCE IF NOT EXISTS product_sku_seq START 1`);
+
+    await this.pool.query(
+      `
+      SELECT setval(
+        'product_sku_seq',
+        GREATEST(
+          (
+            SELECT COALESCE(MAX(CAST(sku AS INTEGER)), 0) + 1
+            FROM products
+            WHERE sku ~ $1
+          ),
+          (
+            SELECT CASE
+              WHEN is_called THEN last_value + 1
+              ELSE last_value
+            END
+            FROM product_sku_seq
+          )
+        ),
+        false
+      )
+      `,
+      [GENERATED_SKU_PATTERN_SQL]
+    );
+  }
 
   async create(product: Product): Promise<void> {
     await this.pool.query(
@@ -87,20 +119,22 @@ export class PostgresProductRepository implements ProductRepository {
       `
       UPDATE products
       SET
-        name = $2,
-        category_id = $3,
-        supplier_id = $4,
-        purchase_price = $5,
-        sale_price = $6,
-        unit_of_measure = $7,
-        minimum_stock = $8,
-        tracks_expiration = $9,
-        status = $10,
-        updated_at = $11
+        sku = $2,
+        name = $3,
+        category_id = $4,
+        supplier_id = $5,
+        purchase_price = $6,
+        sale_price = $7,
+        unit_of_measure = $8,
+        minimum_stock = $9,
+        tracks_expiration = $10,
+        status = $11,
+        updated_at = $12
       WHERE id = $1
       `,
       [
         product.id,
+        ensureProductSku(product.sku),
         product.name,
         product.categoryId,
         product.supplierId,
@@ -169,6 +203,60 @@ export class PostgresProductRepository implements ProductRepository {
 
     const row = result.rows[0];
     return row ? mapProductRow(row) : null;
+  }
+
+  async nextGeneratedSku(): Promise<string> {
+    await this.ensureGeneratedSkuSequenceReady();
+
+    const result = await this.pool.query<{ sku: string }>(
+      `
+      SELECT LPAD(nextval('product_sku_seq')::text, 6, '0') AS sku
+      `
+    );
+
+    return ensureProductSku(result.rows[0]?.sku ?? "");
+  }
+
+  async previewNextGeneratedSku(): Promise<string> {
+    await this.ensureGeneratedSkuSequenceReady();
+
+    const result = await this.pool.query<{ next_sequence: string }>(
+      `
+      SELECT (
+        SELECT CASE
+          WHEN is_called THEN last_value + 1
+          ELSE last_value
+        END
+        FROM product_sku_seq
+      )::text AS next_sequence
+      `
+    );
+
+    return buildGeneratedProductSku(Number(result.rows[0]?.next_sequence ?? 0));
+  }
+
+  async syncGeneratedSkuSequence(sku: string): Promise<void> {
+    await this.ensureGeneratedSkuSequenceReady();
+
+    const sequence = parseGeneratedProductSkuSequence(sku);
+
+    if (sequence === null) {
+      return;
+    }
+
+    await this.pool.query(
+      `
+      SELECT setval(
+        'product_sku_seq',
+        GREATEST(
+          (SELECT last_value FROM product_sku_seq),
+          $1::bigint
+        ),
+        true
+      )
+      `,
+      [sequence]
+    );
   }
 
   async list(filter?: ProductFilter): Promise<Product[]> {

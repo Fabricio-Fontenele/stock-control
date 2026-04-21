@@ -6,13 +6,14 @@ export const PRODUCT_STATUS = {
 export type ProductStatus = (typeof PRODUCT_STATUS)[keyof typeof PRODUCT_STATUS];
 export type ProductId = string;
 export type ProductSku = string;
+const GENERATED_PRODUCT_SKU_PATTERN = /^(\d+)$/;
 
 export interface Product {
   id: ProductId;
   sku: ProductSku;
   name: string;
   categoryId: string;
-  supplierId: string;
+  supplierId: string | null;
   purchasePrice: number;
   salePrice: number;
   unitOfMeasure: string;
@@ -31,6 +32,25 @@ export const ensureProductSku = (value: string): ProductSku => {
   }
 
   return sku;
+};
+
+export const buildGeneratedProductSku = (sequence: number): ProductSku => {
+  if (!Number.isInteger(sequence) || sequence <= 0) {
+    throw new Error("Product SKU sequence must be a positive integer");
+  }
+
+  return String(sequence).padStart(6, "0");
+};
+
+export const parseGeneratedProductSkuSequence = (value: string): number | null => {
+  const sku = ensureProductSku(value);
+  const match = GENERATED_PRODUCT_SKU_PATTERN.exec(sku);
+
+  if (!match) {
+    return null;
+  }
+
+  return Number(match[1]);
 };
 
 export const ensureProductMinimumStock = (value: number): number => {

@@ -5,6 +5,7 @@ import { UpdateProductUseCase } from "../../../src/application/use-cases/update-
 import { ListProductsUseCase } from "../../../src/application/use-cases/list-products.use-case.js";
 import { GetProductDetailUseCase } from "../../../src/application/use-cases/get-product-detail.use-case.js";
 import { DeactivateProductUseCase } from "../../../src/application/use-cases/deactivate-product.use-case.js";
+import { ReactivateProductUseCase } from "../../../src/application/use-cases/reactivate-product.use-case.js";
 import type { ProductRepository } from "../../../src/application/ports/product-repository.js";
 import type { CategoryRepository } from "../../../src/application/ports/category-repository.js";
 import type { SupplierRepository } from "../../../src/application/ports/supplier-repository.js";
@@ -17,7 +18,7 @@ const createProduct = (overrides: Partial<Product> = {}): Product => ({
   sku: overrides.sku ?? "SKU-1",
   name: overrides.name ?? "Produto 1",
   categoryId: overrides.categoryId ?? "cat-1",
-  supplierId: overrides.supplierId ?? "sup-1",
+  supplierId: overrides.supplierId !== undefined ? overrides.supplierId : "sup-1",
   purchasePrice: overrides.purchasePrice ?? 10,
   salePrice: overrides.salePrice ?? 20,
   unitOfMeasure: overrides.unitOfMeasure ?? "un",
@@ -46,6 +47,9 @@ const createProductRepository = (product = createProduct()): ProductRepository =
   update: vi.fn().mockResolvedValue(undefined),
   findById: vi.fn().mockResolvedValue(product),
   findBySku: vi.fn().mockResolvedValue(null),
+  previewNextGeneratedSku: vi.fn().mockResolvedValue("000001"),
+  nextGeneratedSku: vi.fn().mockResolvedValue("000001"),
+  syncGeneratedSkuSequence: vi.fn().mockResolvedValue(undefined),
   list: vi.fn().mockResolvedValue([product])
 });
 
@@ -92,7 +96,7 @@ const createStockRepository = (lots: StockLot[] = [createLot()]): StockRepositor
 });
 
 describe("manage product use cases", () => {
-  it("creates product when SKU is free and references exist", async () => {
+  it("creates product with custom SKU when references exist", async () => {
     const productRepository = createProductRepository();
 
     const useCase = new CreateProductUseCase({
@@ -102,7 +106,7 @@ describe("manage product use cases", () => {
     });
 
     const product = await useCase.execute({
-      sku: "sku-new",
+      sku: "000111",
       name: "Novo Produto",
       categoryId: "cat-1",
       supplierId: "sup-1",
@@ -113,8 +117,9 @@ describe("manage product use cases", () => {
       tracksExpiration: true
     });
 
-    expect(product.sku).toBe("SKU-NEW");
+    expect(product.sku).toBe("000111");
     expect(productRepository.create).toHaveBeenCalledTimes(1);
+    expect(productRepository.syncGeneratedSkuSequence).toHaveBeenCalledWith("000111");
   });
 
   it("blocks SKU reuse when creating product", async () => {
@@ -131,7 +136,6 @@ describe("manage product use cases", () => {
 
     await expect(
       useCase.execute({
-        sku: "SKU-1",
         name: "Duplicado",
         categoryId: "cat-1",
         supplierId: "sup-1",
@@ -167,6 +171,77 @@ describe("manage product use cases", () => {
     expect(productRepository.update).toHaveBeenCalledTimes(1);
   });
 
+  it("updates product SKU when a new one is provided", async () => {
+    const product = createProduct({ sku: "000001" });
+    const productRepository = createProductRepository(product);
+    (productRepository.findBySku as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);
+
+    const useCase = new UpdateProductUseCase({
+      productRepository,
+      categoryRepository: createCategoryRepository(),
+      supplierRepository: createSupplierRepository()
+    });
+
+    const updated = await useCase.execute({
+      productId: product.id,
+      sku: "000321"
+    });
+
+    expect(updated.sku).toBe("000321");
+    expect(productRepository.update).toHaveBeenCalledWith(
+      expect.objectContaining({ sku: "000321" })
+    );
+    expect(productRepository.syncGeneratedSkuSequence).toHaveBeenCalledWith("000321");
+  });
+
+  it("creates product without supplier", async () => {
+    const productRepository = createProductRepository();
+
+    const useCase = new CreateProductUseCase({
+      productRepository,
+      categoryRepository: createCategoryRepository(),
+      supplierRepository: createSupplierRepository()
+    });
+
+    const product = await useCase.execute({
+      name: "Sem Fornecedor",
+      categoryId: "cat-1",
+      supplierId: null,
+      purchasePrice: 5,
+      salePrice: 10,
+      unitOfMeasure: "un",
+      minimumStock: 1,
+      tracksExpiration: true
+    });
+
+    expect(product.supplierId).toBeNull();
+  });
+
+  it("generates SKU when one is not provided", async () => {
+    const productRepository = createProductRepository();
+
+    const useCase = new CreateProductUseCase({
+      productRepository,
+      categoryRepository: createCategoryRepository(),
+      supplierRepository: createSupplierRepository()
+    });
+
+    const product = await useCase.execute({
+      name: "Gerado",
+      categoryId: "cat-1",
+      supplierId: null,
+      purchasePrice: 5,
+      salePrice: 10,
+      unitOfMeasure: "un",
+      minimumStock: 1,
+      tracksExpiration: true
+    });
+
+    expect(product.sku).toBe("000001");
+    expect(productRepository.nextGeneratedSku).toHaveBeenCalledTimes(1);
+    expect(productRepository.syncGeneratedSkuSequence).toHaveBeenCalledWith("000001");
+  });
+
   it("lists products with derived stock view", async () => {
     const useCase = new ListProductsUseCase({
       productRepository: createProductRepository(),
@@ -181,6 +256,38 @@ describe("manage product use cases", () => {
     expect(items).toHaveLength(1);
     expect(items[0]?.availableQuantity).toBe(3);
     expect(items[0]?.belowMinimum).toBe(false);
+  });
+
+  it("deactivates active product", async () => {
+    const productRepository = createProductRepository(createProduct());
+
+    const useCase = new DeactivateProductUseCase({
+      productRepository
+    });
+
+    const updated = await useCase.execute("product-1");
+
+    expect(updated.status).toBe(PRODUCT_STATUS.INACTIVE);
+    expect(productRepository.update).toHaveBeenCalledWith(
+      expect.objectContaining({ status: PRODUCT_STATUS.INACTIVE })
+    );
+  });
+
+  it("reactivates inactive product", async () => {
+    const productRepository = createProductRepository(
+      createProduct({ status: PRODUCT_STATUS.INACTIVE })
+    );
+
+    const useCase = new ReactivateProductUseCase({
+      productRepository
+    });
+
+    const updated = await useCase.execute("product-1");
+
+    expect(updated.status).toBe(PRODUCT_STATUS.ACTIVE);
+    expect(productRepository.update).toHaveBeenCalledWith(
+      expect.objectContaining({ status: PRODUCT_STATUS.ACTIVE })
+    );
   });
 
   it("returns product detail with lot statuses", async () => {

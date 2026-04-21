@@ -9,6 +9,7 @@ import {
   ensureProductMinimumStock,
   ensureProductSku,
   ensureProductSkuReservation,
+  parseGeneratedProductSkuSequence,
   type Product
 } from "../../domain/entities/product.js";
 import { HttpError } from "../errors/http-error.js";
@@ -23,12 +24,14 @@ export class CreateProductUseCase {
   constructor(private readonly deps: CreateProductDependencies) {}
 
   async execute(input: CreateProductInput): Promise<Product> {
-    const sku = ensureProductSku(input.sku);
+    const sku = input.sku ? ensureProductSku(input.sku) : await this.deps.productRepository.nextGeneratedSku();
 
     const [existingProduct, category, supplier] = await Promise.all([
       this.deps.productRepository.findBySku(sku),
       this.deps.categoryRepository.findById(input.categoryId),
-      this.deps.supplierRepository.findById(input.supplierId)
+      input.supplierId
+        ? this.deps.supplierRepository.findById(input.supplierId)
+        : Promise.resolve(null)
     ]);
 
     try {
@@ -45,7 +48,7 @@ export class CreateProductUseCase {
       throw new HttpError(404, "Category not found");
     }
 
-    if (!supplier) {
+    if (input.supplierId && !supplier) {
       throw new HttpError(404, "Supplier not found");
     }
 
@@ -67,6 +70,11 @@ export class CreateProductUseCase {
     };
 
     await this.deps.productRepository.create(product);
+
+    if (parseGeneratedProductSkuSequence(sku) !== null) {
+      await this.deps.productRepository.syncGeneratedSkuSequence(sku);
+    }
+
     return product;
   }
 }

@@ -2,7 +2,7 @@ import "dotenv/config";
 
 import { buildApp } from "./app.js";
 
-const DEFAULT_PORT = 3000;
+const DEFAULT_PORT = 3333;
 
 const parsePort = (value: string | undefined): number => {
   if (!value) {

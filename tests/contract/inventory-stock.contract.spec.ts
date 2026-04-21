@@ -102,7 +102,7 @@ describe("contract /inventory/stock", () => {
     await app.close();
   });
 
-  it("returns items[] for stock search using 'search' query param", async () => {
+  it("returns items[] for stock search using optional 'search' query param", async () => {
     const loginResponse = await app.inject({
       method: "POST",
       url: "/auth/login",
@@ -130,9 +130,39 @@ describe("contract /inventory/stock", () => {
     expect(target).toBeDefined();
     expect(target).toMatchObject({
       sku,
+      unitOfMeasure: "un",
+      salePrice: 2,
       status: "active",
       availableQuantity: 10,
       hasExpiredLots: true
     });
+    expect(target.updatedAt).toBeDefined();
+  });
+
+  it("lists active stock items even without search", async () => {
+    const loginResponse = await app.inject({
+      method: "POST",
+      url: "/auth/login",
+      payload: {
+        email: "admin@conveniencia.local",
+        password: "admin123"
+      }
+    });
+
+    const { accessToken } = loginResponse.json();
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/inventory/stock",
+      headers: {
+        authorization: `Bearer ${accessToken}`
+      }
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(Array.isArray(response.json().items)).toBe(true);
+    expect(
+      response.json().items.some((item: { sku: string }) => item.sku === sku)
+    ).toBe(true);
   });
 });

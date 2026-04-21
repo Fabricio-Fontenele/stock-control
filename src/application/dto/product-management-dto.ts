@@ -7,7 +7,7 @@ export interface ProductListItemDto {
   sku: string;
   name: string;
   categoryId: string;
-  supplierId: string;
+  supplierId: string | null;
   purchasePrice: number;
   salePrice: number;
   unitOfMeasure: string;
@@ -33,10 +33,10 @@ export interface ProductDetailDto extends ProductListItemDto {
 }
 
 export interface CreateProductInput {
-  sku: string;
+  sku?: string;
   name: string;
   categoryId: string;
-  supplierId: string;
+  supplierId: string | null;
   purchasePrice: number;
   salePrice: number;
   unitOfMeasure: string;
@@ -49,7 +49,7 @@ export interface UpdateProductInput {
   sku?: string;
   name?: string;
   categoryId?: string;
-  supplierId?: string;
+  supplierId?: string | null;
   purchasePrice?: number;
   salePrice?: number;
   unitOfMeasure?: string;

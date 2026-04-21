@@ -27,6 +27,9 @@ const createProductRepository = (): ProductRepository => ({
     updatedAt: new Date("2026-01-01")
   }),
   findBySku: vi.fn(),
+  previewNextGeneratedSku: vi.fn().mockResolvedValue("000001"),
+  nextGeneratedSku: vi.fn().mockResolvedValue("000001"),
+  syncGeneratedSkuSequence: vi.fn(),
   list: vi.fn()
 });
 

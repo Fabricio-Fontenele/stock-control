@@ -76,6 +76,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductView'
+  /products/next-sku:
+    get:
+      tags: [Products]
+      summary: Get the next generated SKU suggestion
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Next generated SKU
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [sku]
+                properties:
+                  sku:
+                    type: string
   /products/{productId}:
     get:
       tags: [Products]
@@ -122,6 +139,17 @@ paths:
       responses:
         '200':
           description: Product deactivated
+  /products/{productId}/reactivate:
+    post:
+      tags: [Products]
+      summary: Reactivate product
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: Product reactivated
   /categories:
     get:
       tags: [Categories]
@@ -352,13 +380,12 @@ paths:
   /inventory/stock:
     get:
       tags: [Inventory]
-      summary: Search stock by product SKU or name
+      summary: List stock with optional filter by product SKU or name
       security:
         - bearerAuth: []
       parameters:
         - in: query
           name: search
-          required: true
           schema:
             type: string
       responses:
@@ -471,18 +498,14 @@ components:
     CreateProductRequest:
       type: object
       required:
-        - sku
         - name
         - categoryId
-        - supplierId
         - purchasePrice
         - salePrice
         - unitOfMeasure
         - minimumStock
         - tracksExpiration
       properties:
-        sku:
-          type: string
         name:
           type: string
         categoryId:
@@ -491,6 +514,7 @@ components:
         supplierId:
           type: string
           format: uuid
+          nullable: true
         purchasePrice:
           type: number
         salePrice:
@@ -502,8 +526,29 @@ components:
         tracksExpiration:
           type: boolean
     UpdateProductRequest:
-      allOf:
-        - $ref: '#/components/schemas/CreateProductRequest'
+      type: object
+      properties:
+        sku:
+          type: string
+        name:
+          type: string
+        categoryId:
+          type: string
+          format: uuid
+        supplierId:
+          type: string
+          format: uuid
+          nullable: true
+        purchasePrice:
+          type: number
+        salePrice:
+          type: number
+        unitOfMeasure:
+          type: string
+        minimumStock:
+          type: number
+        tracksExpiration:
+          type: boolean
     CreateCategoryRequest:
       type: object
       required: [name]

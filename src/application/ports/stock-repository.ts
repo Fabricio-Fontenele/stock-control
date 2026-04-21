@@ -5,6 +5,9 @@ export interface ProductStockSnapshot {
   productId: string;
   sku: string;
   productName: string;
+  unitOfMeasure: string;
+  salePrice: number;
+  updatedAt: Date;
   status: "active" | "inactive";
   availableQuantity: number;
   minimumStock: number;
@@ -36,7 +39,7 @@ export interface StockRepository {
   updateLot(lot: StockLot, tx?: TransactionContext): Promise<void>;
   findLotsByProduct(productId: string, tx?: TransactionContext): Promise<StockLot[]>;
   findEligibleLotsByProduct(productId: string, asOf: Date): Promise<StockLot[]>;
-  searchProductStock(query: string, referenceDate?: Date): Promise<ProductStockSnapshot[]>;
+  searchProductStock(query?: string, referenceDate?: Date): Promise<ProductStockSnapshot[]>;
   findBelowMinimumProducts(referenceDate: Date): Promise<ProductStockSnapshot[]>;
   findExpiringLots(referenceDate: Date, windowDays: number): Promise<ProductLotAlert[]>;
   findExpiredLots(referenceDate: Date): Promise<ProductLotAlert[]>;

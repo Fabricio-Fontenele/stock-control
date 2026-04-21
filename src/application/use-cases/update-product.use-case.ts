@@ -6,6 +6,7 @@ import {
   ensureProductMinimumStock,
   ensureProductSku,
   ensureProductSkuReservation,
+  parseGeneratedProductSkuSequence,
   type Product
 } from "../../domain/entities/product.js";
 import { HttpError } from "../errors/http-error.js";
@@ -56,7 +57,7 @@ export class UpdateProductUseCase {
       sku: nextSku,
       name: input.name?.trim() || existing.name,
       categoryId: input.categoryId ?? existing.categoryId,
-      supplierId: input.supplierId ?? existing.supplierId,
+      supplierId: input.supplierId !== undefined ? input.supplierId : existing.supplierId,
       purchasePrice: input.purchasePrice ?? existing.purchasePrice,
       salePrice: input.salePrice ?? existing.salePrice,
       unitOfMeasure: input.unitOfMeasure?.trim() || existing.unitOfMeasure,
@@ -69,6 +70,11 @@ export class UpdateProductUseCase {
     };
 
     await this.deps.productRepository.update(updated);
+
+    if (input.sku !== undefined && parseGeneratedProductSkuSequence(updated.sku) !== null) {
+      await this.deps.productRepository.syncGeneratedSkuSequence(updated.sku);
+    }
+
     return updated;
   }
 }

@@ -8,18 +8,17 @@ interface SearchStockDependencies {
 export class SearchStockUseCase {
   constructor(private readonly deps: SearchStockDependencies) {}
 
-  async execute(query: string): Promise<ProductStockSnapshotDto[]> {
-    const normalizedQuery = query.trim();
-
-    if (!normalizedQuery) {
-      return [];
-    }
-
+  async execute(query?: string): Promise<ProductStockSnapshotDto[]> {
+    const normalizedQuery = query?.trim();
     const snapshots = await this.deps.stockRepository.searchProductStock(normalizedQuery);
+
     return snapshots.map((snapshot) => ({
       productId: snapshot.productId,
       sku: snapshot.sku,
       productName: snapshot.productName,
+      unitOfMeasure: snapshot.unitOfMeasure,
+      salePrice: snapshot.salePrice,
+      updatedAt: snapshot.updatedAt,
       status: snapshot.status,
       availableQuantity: snapshot.availableQuantity,
       minimumStock: snapshot.minimumStock,
