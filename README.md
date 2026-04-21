@@ -3,6 +3,9 @@
 API backend em TypeScript/Fastify para controle de estoque por lote, com auditoria,
 autenticacao JWT, alertas de vencimento e operacoes administrativas.
 
+Frontend web em Next 15 + Tailwind 4 em `apps/web`, com sessao por cookie
+HTTP-only e foco em operacao + administracao.
+
 ## Estado Atual
 
 - Setup, fundacao, US1, US2, US3 e hardening operacional implementados.
@@ -16,6 +19,13 @@ autenticacao JWT, alertas de vencimento e operacoes administrativas.
   - logging explicito de request/response
   - headers de seguranca nas respostas HTTP
   - respostas JWT endurecidas para token ausente, invalido ou expirado
+- Frontend MVP em andamento:
+  - login e sessao protegida no Next
+  - estoque como fluxo principal de operacao, com listagem inicial, filtro, ordenacao, paginacao leve e clique no produto para registrar saida
+  - alertas administrativos
+  - categorias, fornecedores, catalogo em tabela com ordenacao por coluna e entradas por lote
+  - refinamentos de UX para estados vazios, toasts de feedback e navegacao operacional
+  - cadastro de produto com SKU numerico sugerido automaticamente sem consumir a sequencia, ainda editavel, fornecedor opcional, unidade selecionavel, calculo bidirecional entre margem e preco final e reativacao de produto inativo
 
 ## Comandos
 
@@ -25,6 +35,30 @@ npm run build
 npm run test:unit
 npm test
 ```
+
+## Frontend Web
+
+```bash
+cd apps/web
+npm install
+npm run build
+```
+
+Variaveis de ambiente do frontend:
+
+- `STOCK_CONTROL_API_URL=http://localhost:3000`
+- `WEB_SESSION_SECRET=change-me-in-shared-environments`
+
+Fluxos ja implementados no frontend:
+
+- `login`
+- `estoque`
+- `estoque/saida`
+- `alertas`
+- `categorias`
+- `fornecedores`
+- `catalogo` (`/produtos`)
+- `entradas`
 
 ## Banco Local
 
@@ -46,6 +80,7 @@ Credenciais padrao de desenvolvimento:
 - `GET /products/:productId`
 - `PATCH /products/:productId`
 - `POST /products/:productId/deactivate`
+- `POST /products/:productId/reactivate`
 - `GET /categories`
 - `POST /categories`
 - `PATCH /categories/:categoryId`
