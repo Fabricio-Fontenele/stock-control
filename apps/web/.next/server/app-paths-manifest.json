@@ -1,0 +1,5 @@
+{
+  "/(protected)/produtos/page": "app/(protected)/produtos/page.js",
+  "/(protected)/categorias/page": "app/(protected)/categorias/page.js",
+  "/(protected)/produtos/[productId]/page": "app/(protected)/produtos/[productId]/page.js"
+}

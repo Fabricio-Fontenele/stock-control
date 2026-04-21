@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f6efd8;
+  --foreground: #162228;
+}
+
+html {
+  background: var(--background);
+}
+
+body {
+  color: var(--foreground);
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+}

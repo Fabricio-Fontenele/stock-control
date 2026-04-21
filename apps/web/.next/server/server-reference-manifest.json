@@ -1,0 +1,71 @@
+{
+  "node": {
+    "40205de34077b3e363fbceccd0832cb127a109f105": {
+      "workers": {
+        "app/(protected)/categorias/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2Fhome%2Ffabricio%2FDocumentos%2Fportifolio%2Fstoque-controll-convenience%2Fapps%2Fweb%2Fsrc%2Fapp%2F(protected)%2Fcategorias%2Fpage.tsx%22%2C%5B%7B%22id%22%3A%2240205de34077b3e363fbceccd0832cb127a109f105%22%2C%22exportedName%22%3A%22%24%24RSC_SERVER_ACTION_0%22%2C%22filename%22%3A%22app%2F(protected)%2Fcategorias%2Fpage.tsx%22%7D%2C%7B%22id%22%3A%2240331aff3c8f312e65f7d5d8b81801936f3422affe%22%2C%22exportedName%22%3A%22%24%24RSC_SERVER_ACTION_1%22%2C%22filename%22%3A%22app%2F(protected)%2Fcategorias%2Fpage.tsx%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/(protected)/categorias/page": "rsc"
+      },
+      "filename": "app/(protected)/categorias/page.tsx",
+      "exportedName": "$$RSC_SERVER_ACTION_0"
+    },
+    "40331aff3c8f312e65f7d5d8b81801936f3422affe": {
+      "workers": {
+        "app/(protected)/categorias/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2Fhome%2Ffabricio%2FDocumentos%2Fportifolio%2Fstoque-controll-convenience%2Fapps%2Fweb%2Fsrc%2Fapp%2F(protected)%2Fcategorias%2Fpage.tsx%22%2C%5B%7B%22id%22%3A%2240205de34077b3e363fbceccd0832cb127a109f105%22%2C%22exportedName%22%3A%22%24%24RSC_SERVER_ACTION_0%22%2C%22filename%22%3A%22app%2F(protected)%2Fcategorias%2Fpage.tsx%22%7D%2C%7B%22id%22%3A%2240331aff3c8f312e65f7d5d8b81801936f3422affe%22%2C%22exportedName%22%3A%22%24%24RSC_SERVER_ACTION_1%22%2C%22filename%22%3A%22app%2F(protected)%2Fcategorias%2Fpage.tsx%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/(protected)/categorias/page": "rsc"
+      },
+      "filename": "app/(protected)/categorias/page.tsx",
+      "exportedName": "$$RSC_SERVER_ACTION_1"
+    },
+    "4043eff093d81a79bb4f7fb1a4b608e031900c828d": {
+      "workers": {
+        "app/(protected)/produtos/[productId]/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2Fhome%2Ffabricio%2FDocumentos%2Fportifolio%2Fstoque-controll-convenience%2Fapps%2Fweb%2Fsrc%2Fapp%2F(protected)%2Fprodutos%2F%5BproductId%5D%2Fpage.tsx%22%2C%5B%7B%22id%22%3A%224043eff093d81a79bb4f7fb1a4b608e031900c828d%22%2C%22exportedName%22%3A%22%24%24RSC_SERVER_ACTION_1%22%2C%22filename%22%3A%22app%2F(protected)%2Fprodutos%2F%5BproductId%5D%2Fpage.tsx%22%7D%2C%7B%22id%22%3A%22408d56ba0297f2021b99eaf7ad6b1b4fe543d64a78%22%2C%22exportedName%22%3A%22%24%24RSC_SERVER_ACTION_0%22%2C%22filename%22%3A%22app%2F(protected)%2Fprodutos%2F%5BproductId%5D%2Fpage.tsx%22%7D%2C%7B%22id%22%3A%2240edab75c6cc2f3eaace36652d59cd9bef817a293c%22%2C%22exportedName%22%3A%22%24%24RSC_SERVER_ACTION_2%22%2C%22filename%22%3A%22app%2F(protected)%2Fprodutos%2F%5BproductId%5D%2Fpage.tsx%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/(protected)/produtos/[productId]/page": "rsc"
+      },
+      "filename": "app/(protected)/produtos/[productId]/page.tsx",
+      "exportedName": "$$RSC_SERVER_ACTION_1"
+    },
+    "408d56ba0297f2021b99eaf7ad6b1b4fe543d64a78": {
+      "workers": {
+        "app/(protected)/produtos/[productId]/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2Fhome%2Ffabricio%2FDocumentos%2Fportifolio%2Fstoque-controll-convenience%2Fapps%2Fweb%2Fsrc%2Fapp%2F(protected)%2Fprodutos%2F%5BproductId%5D%2Fpage.tsx%22%2C%5B%7B%22id%22%3A%224043eff093d81a79bb4f7fb1a4b608e031900c828d%22%2C%22exportedName%22%3A%22%24%24RSC_SERVER_ACTION_1%22%2C%22filename%22%3A%22app%2F(protected)%2Fprodutos%2F%5BproductId%5D%2Fpage.tsx%22%7D%2C%7B%22id%22%3A%22408d56ba0297f2021b99eaf7ad6b1b4fe543d64a78%22%2C%22exportedName%22%3A%22%24%24RSC_SERVER_ACTION_0%22%2C%22filename%22%3A%22app%2F(protected)%2Fprodutos%2F%5BproductId%5D%2Fpage.tsx%22%7D%2C%7B%22id%22%3A%2240edab75c6cc2f3eaace36652d59cd9bef817a293c%22%2C%22exportedName%22%3A%22%24%24RSC_SERVER_ACTION_2%22%2C%22filename%22%3A%22app%2F(protected)%2Fprodutos%2F%5BproductId%5D%2Fpage.tsx%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/(protected)/produtos/[productId]/page": "rsc"
+      },
+      "filename": "app/(protected)/produtos/[productId]/page.tsx",
+      "exportedName": "$$RSC_SERVER_ACTION_0"
+    },
+    "40edab75c6cc2f3eaace36652d59cd9bef817a293c": {
+      "workers": {
+        "app/(protected)/produtos/[productId]/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2Fhome%2Ffabricio%2FDocumentos%2Fportifolio%2Fstoque-controll-convenience%2Fapps%2Fweb%2Fsrc%2Fapp%2F(protected)%2Fprodutos%2F%5BproductId%5D%2Fpage.tsx%22%2C%5B%7B%22id%22%3A%224043eff093d81a79bb4f7fb1a4b608e031900c828d%22%2C%22exportedName%22%3A%22%24%24RSC_SERVER_ACTION_1%22%2C%22filename%22%3A%22app%2F(protected)%2Fprodutos%2F%5BproductId%5D%2Fpage.tsx%22%7D%2C%7B%22id%22%3A%22408d56ba0297f2021b99eaf7ad6b1b4fe543d64a78%22%2C%22exportedName%22%3A%22%24%24RSC_SERVER_ACTION_0%22%2C%22filename%22%3A%22app%2F(protected)%2Fprodutos%2F%5BproductId%5D%2Fpage.tsx%22%7D%2C%7B%22id%22%3A%2240edab75c6cc2f3eaace36652d59cd9bef817a293c%22%2C%22exportedName%22%3A%22%24%24RSC_SERVER_ACTION_2%22%2C%22filename%22%3A%22app%2F(protected)%2Fprodutos%2F%5BproductId%5D%2Fpage.tsx%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/(protected)/produtos/[productId]/page": "rsc"
+      },
+      "filename": "app/(protected)/produtos/[productId]/page.tsx",
+      "exportedName": "$$RSC_SERVER_ACTION_2"
+    }
+  },
+  "edge": {},
+  "encryptionKey": "sa22yGHBwiovt73YvWJKZ3XP0uRJNY9Y4TWy4NRN+OU="
+}
