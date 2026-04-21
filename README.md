@@ -5,15 +5,17 @@ autenticacao JWT, alertas de vencimento e operacoes administrativas.
 
 ## Estado Atual
 
-- Setup, fundacao, US1, US2 e US3 implementadas.
+- Setup, fundacao, US1, US2, US3 e hardening operacional implementados.
 - Fluxos administrativos cobertos:
   - gestao de produtos
   - gestao de categorias
   - gestao de fornecedores
   - relatorio de movimentacoes
   - liberacao excepcional de lote vencido
-- Pendente principal restante:
-  - hardening operacional de seguranca e logging
+- Endurecimento operacional aplicado:
+  - logging explicito de request/response
+  - headers de seguranca nas respostas HTTP
+  - respostas JWT endurecidas para token ausente, invalido ou expirado
 
 ## Comandos
 

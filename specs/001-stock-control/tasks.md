@@ -132,7 +132,7 @@
 
 **Purpose**: Finish documentation, operational hardening, and full-scenario validation across stories.
 
-- [ ] T040 [P] Add request logging, security headers, and JWT error hardening in `src/interface/api/plugins/error-handler.ts` and `src/app.ts`
+- [x] T040 [P] Add request logging, security headers, and JWT error hardening in `src/interface/api/plugins/error-handler.ts` and `src/app.ts`
 - [x] T041 [P] Document local setup, seed flow, and API usage in `README.md`
 - [x] T042 Run the end-to-end quickstart validation and record any missing setup details in `specs/001-stock-control/quickstart.md`
 
