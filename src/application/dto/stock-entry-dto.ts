@@ -1,9 +1,9 @@
 export interface RegisterStockEntryInput {
   productId: string;
-  lotCode: string | null;
+  lotCode?: string | null;
   quantity: number;
   entryDate: Date;
-  expirationDate: Date | null;
+  expirationDate?: Date | null;
   reasonType: "supplier-purchase" | "restock";
   notes: string | null;
   performedByUserId: string;

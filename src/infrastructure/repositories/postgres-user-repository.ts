@@ -86,4 +86,42 @@ export class PostgresUserRepository implements UserRepository {
     const row = result.rows[0];
     return row ? mapUserRow(row) : null;
   }
+
+  async update(user: User): Promise<void> {
+    await this.pool.query(
+      `
+      UPDATE users
+      SET name = $2, email = $3, password_hash = $4, role = $5, status = $6, updated_at = $7
+      WHERE id = $1
+      `,
+      [
+        user.id,
+        user.name,
+        user.email,
+        user.passwordHash,
+        user.role,
+        user.status,
+        user.updatedAt
+      ]
+    );
+  }
+
+  async list(): Promise<User[]> {
+    const result: QueryResult<UserRow> = await this.pool.query(
+      `
+      SELECT id, name, email, password_hash, role, status, created_at, updated_at
+      FROM users
+      ORDER BY name ASC
+      `
+    );
+
+    return result.rows.map(mapUserRow);
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.pool.query(
+      `DELETE FROM users WHERE id = $1`,
+      [id]
+    );
+  }
 }

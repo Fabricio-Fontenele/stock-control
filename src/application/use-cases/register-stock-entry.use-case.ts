@@ -17,7 +17,6 @@ import {
   ensurePositiveLotQuantity,
   type StockLot
 } from "../../domain/entities/stock-lot.js";
-import { ensureExpirationDateWhenRequired } from "../../domain/policies/expiration-policy.js";
 
 interface RegisterStockEntryDependencies {
   productRepository: ProductRepository;
@@ -57,18 +56,6 @@ export class RegisterStockEntryUseCase {
       throw new HttpError(409, "Inactive product cannot receive common entries");
     }
 
-    let expirationDate: Date | null;
-
-    try {
-      expirationDate = ensureExpirationDateWhenRequired(product.tracksExpiration, input.expirationDate);
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new HttpError(400, error.message);
-      }
-
-      throw error;
-    }
-
     const now = new Date();
 
     return this.deps.unitOfWork.runInTransaction(async (tx) => {
@@ -79,7 +66,7 @@ export class RegisterStockEntryUseCase {
         receivedQuantity: input.quantity,
         remainingQuantity: ensureLotRemainingQuantity(input.quantity, input.quantity),
         entryDate: input.entryDate,
-        expirationDate,
+        expirationDate: null,
         status: STOCK_LOT_STATUS.AVAILABLE,
         createdAt: now,
         updatedAt: now

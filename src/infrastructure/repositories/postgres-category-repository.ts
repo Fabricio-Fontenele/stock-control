@@ -85,4 +85,11 @@ export class PostgresCategoryRepository implements CategoryRepository {
 
     return result.rows.map(mapCategoryRow);
   }
+
+  async delete(id: string): Promise<void> {
+    await this.pool.query(
+      `DELETE FROM categories WHERE id = $1`,
+      [id]
+    );
+  }
 }

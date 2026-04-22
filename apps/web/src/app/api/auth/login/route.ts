@@ -4,7 +4,9 @@ import { NextResponse } from "next/server";
 import { createSignedSessionValue, SESSION_COOKIE } from "@/lib/auth/session";
 
 const API_BASE_URL =
-  process.env.STOCK_CONTROL_API_URL ?? "http://localhost:3000";
+  process.env.STOCK_CONTROL_API_URL ??
+  process.env.NEXT_PUBLIC_STOCK_CONTROL_API_URL ??
+  "http://localhost:3333";
 
 export async function POST(request: Request) {
   const formData = await request.formData();

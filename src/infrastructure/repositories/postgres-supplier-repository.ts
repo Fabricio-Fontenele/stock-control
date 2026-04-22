@@ -116,4 +116,11 @@ export class PostgresSupplierRepository implements SupplierRepository {
 
     return result.rows.map(mapSupplierRow);
   }
+
+  async delete(id: string): Promise<void> {
+    await this.pool.query(
+      `DELETE FROM suppliers WHERE id = $1`,
+      [id]
+    );
+  }
 }

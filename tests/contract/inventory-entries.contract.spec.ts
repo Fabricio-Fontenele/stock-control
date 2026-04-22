@@ -87,10 +87,8 @@ describe("contract /inventory/entries", () => {
       },
       payload: {
         productId,
-        lotCode: "LOT-ENTRY-CONTRACT",
         quantity: 6,
         entryDate: new Date().toISOString(),
-        expirationDate: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString(),
         reasonType: "supplier-purchase"
       }
     });

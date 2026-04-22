@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CheckIcon, ErrorIcon, InfoIcon } from "@/components/ui-icons";
 
 interface ToastNoticeProps {
   message: string;
@@ -13,10 +14,17 @@ const toneClasses: Record<NonNullable<ToastNoticeProps["tone"]>, string> = {
   info: "border-slate-200 bg-slate-50 text-slate-700"
 };
 
+const toneIcons = {
+  success: CheckIcon,
+  error: ErrorIcon,
+  info: InfoIcon
+} as const;
+
 export function ToastNotice({
   message,
   tone = "success"
 }: ToastNoticeProps) {
+  const Icon = toneIcons[tone];
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
@@ -38,7 +46,10 @@ export function ToastNotice({
       <div
         className={`pointer-events-auto min-w-[20rem] max-w-sm rounded-3xl border px-5 py-4 text-sm shadow-lg backdrop-blur ${toneClasses[tone]}`}
       >
-        <p className="font-medium">{message}</p>
+        <p className="flex items-start gap-2 font-medium">
+          <Icon className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>{message}</span>
+        </p>
       </div>
     </div>
   );

@@ -3,9 +3,11 @@ import type { FastifyPluginAsync } from "fastify";
 import { CreateSupplierUseCase } from "../../../application/use-cases/create-supplier.use-case.js";
 import { ListSuppliersUseCase } from "../../../application/use-cases/list-suppliers.use-case.js";
 import { UpdateSupplierUseCase } from "../../../application/use-cases/update-supplier.use-case.js";
+import { DeleteSupplierUseCase } from "../../../application/use-cases/delete-supplier.use-case.js";
 import { PostgresSupplierRepository } from "../../../infrastructure/repositories/postgres-supplier-repository.js";
 import { presentSupplier } from "../../presenters/http-presenters.js";
 import { supplierCreateSchema, supplierIdParamSchema, supplierUpdateSchema } from "../schemas/catalog-schemas.js";
+import { HttpError } from "../../../application/errors/http-error.js";
 
 const supplierRoutes: FastifyPluginAsync = async (app) => {
   app.get("/suppliers", { preHandler: app.ensureAdmin }, async (_request, reply) => {
@@ -52,6 +54,24 @@ const supplierRoutes: FastifyPluginAsync = async (app) => {
     });
 
     return reply.status(200).send(presentSupplier(supplier));
+  });
+
+  app.delete("/suppliers/:supplierId", { preHandler: app.ensureAdmin }, async (request, reply) => {
+    const params = supplierIdParamSchema.parse(request.params);
+    const useCase = new DeleteSupplierUseCase({
+      supplierRepository: new PostgresSupplierRepository()
+    });
+
+    try {
+      await useCase.execute(params.supplierId);
+    } catch (error) {
+      if (error instanceof HttpError && error.statusCode === 409) {
+        throw error;
+      }
+      throw new HttpError(404, "Fornecedor nao encontrado");
+    }
+
+    return reply.status(204).send();
   });
 };
 

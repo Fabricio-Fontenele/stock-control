@@ -145,10 +145,8 @@ async function seedSmokeData(): Promise<SeedData> {
     token,
     body: {
       productId: product.id,
-      lotCode: `LOTE-E2E-${suffix}`,
       quantity: 10,
       entryDate: new Date().toISOString(),
-      expirationDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(),
       reasonType: "supplier-purchase"
     }
   });

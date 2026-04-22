@@ -1,14 +1,20 @@
+import { PasswordField } from "@/components/password-field";
+
 export default async function LoginPage({
   searchParams
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
   const params = await searchParams;
+  const apiBaseUrl =
+    process.env.STOCK_CONTROL_API_URL ??
+    process.env.NEXT_PUBLIC_STOCK_CONTROL_API_URL ??
+    "http://localhost:3333";
   const errorMessage =
     params.error === "invalid_credentials"
       ? "Credenciais invalidas. Verifique e tente novamente."
       : params.error === "auth_unavailable"
-        ? "Nao foi possivel conectar ao backend. Confirme se a API esta rodando em http://localhost:3000."
+        ? `Nao foi possivel conectar ao backend. Confirme se a API esta rodando em ${apiBaseUrl}.`
         : null;
 
   return (
@@ -51,12 +57,11 @@ export default async function LoginPage({
 
             <label className="block">
               <span className="mb-2 block text-sm font-medium text-slate-800">Senha</span>
-              <input
+              <PasswordField
                 name="password"
-                type="password"
-                required
                 className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-[#16353f]"
                 placeholder="••••••••"
+                autoComplete="current-password"
               />
             </label>
 

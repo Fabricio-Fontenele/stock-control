@@ -10,6 +10,7 @@ import dashboardRoutes from "./interface/api/routes/dashboard-routes.js";
 import reportRoutes from "./interface/api/routes/report-routes.js";
 import productRoutes from "./interface/api/routes/product-routes.js";
 import supplierRoutes from "./interface/api/routes/supplier-routes.js";
+import userRoutes from "./interface/api/routes/user-routes.js";
 
 export interface BuildAppOptions {
   logger?: boolean;
@@ -72,6 +73,7 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   app.register(dashboardRoutes);
   app.register(reportRoutes);
   app.register(supplierRoutes);
+  app.register(userRoutes);
 
   app.get("/health", async () => {
     return {

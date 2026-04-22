@@ -41,10 +41,8 @@ const inventoryRoutes: FastifyPluginAsync = async (app) => {
 
     const movement = await useCase.execute({
       productId: payload.productId,
-      lotCode: payload.lotCode ?? null,
       quantity: payload.quantity,
       entryDate: payload.entryDate,
-      expirationDate: payload.expirationDate ?? null,
       reasonType: payload.reasonType,
       notes: payload.notes ?? null,
       performedByUserId: currentUser.id,

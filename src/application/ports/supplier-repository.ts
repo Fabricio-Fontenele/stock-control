@@ -6,4 +6,5 @@ export interface SupplierRepository {
   findById(id: SupplierId): Promise<Supplier | null>;
   findByName(name: string): Promise<Supplier | null>;
   list(): Promise<Supplier[]>;
+  delete(id: SupplierId): Promise<void>;
 }

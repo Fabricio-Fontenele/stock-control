@@ -64,7 +64,8 @@ const createCategoryRepository = (): CategoryRepository => ({
     updatedAt: new Date()
   }),
   findByName: vi.fn(),
-  list: vi.fn()
+  list: vi.fn(),
+  delete: vi.fn()
 });
 
 const createSupplierRepository = (): SupplierRepository => ({
@@ -81,7 +82,8 @@ const createSupplierRepository = (): SupplierRepository => ({
     updatedAt: new Date()
   }),
   findByName: vi.fn(),
-  list: vi.fn()
+  list: vi.fn(),
+  delete: vi.fn()
 });
 
 const createStockRepository = (lots: StockLot[] = [createLot()]): StockRepository => ({

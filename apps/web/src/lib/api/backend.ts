@@ -1,7 +1,7 @@
 import { getSession } from "@/lib/auth/session";
 
 const API_BASE_URL =
-  process.env.STOCK_CONTROL_API_URL ?? "http://localhost:3000";
+  process.env.NEXT_PUBLIC_STOCK_CONTROL_API_URL ?? "http://localhost:3000";
 
 export class BackendError extends Error {
   constructor(
@@ -46,6 +46,10 @@ export async function apiFetch<T>(
   if (!response.ok) {
     const body = (await response.json().catch(() => null)) as { message?: string } | null;
     throw new BackendError(response.status, body?.message ?? "Falha na requisicao");
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
   }
 
   return response.json() as Promise<T>;

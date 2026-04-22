@@ -20,7 +20,8 @@ const createCategoryRepository = (): CategoryRepository => ({
     updatedAt: new Date()
   }),
   findByName: vi.fn().mockResolvedValue(null),
-  list: vi.fn().mockResolvedValue([])
+  list: vi.fn().mockResolvedValue([]),
+  delete: vi.fn().mockResolvedValue(undefined)
 });
 
 const createSupplierRepository = (): SupplierRepository => ({
@@ -37,7 +38,8 @@ const createSupplierRepository = (): SupplierRepository => ({
     updatedAt: new Date()
   }),
   findByName: vi.fn().mockResolvedValue(null),
-  list: vi.fn().mockResolvedValue([])
+  list: vi.fn().mockResolvedValue([]),
+  delete: vi.fn().mockResolvedValue(undefined)
 });
 
 describe("manage categories and suppliers use cases", () => {

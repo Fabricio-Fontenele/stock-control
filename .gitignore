@@ -33,6 +33,7 @@ pnpm-debug.log*
 Thumbs.db
 .idea/
 .vscode/
+.agents
 
 # Tooling caches
 .cache/

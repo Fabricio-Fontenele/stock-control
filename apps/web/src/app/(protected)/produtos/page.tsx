@@ -5,6 +5,7 @@ import { apiFetch } from "@/lib/api/backend";
 import { EmptyState } from "@/components/empty-state";
 import { requireAdminSession } from "@/lib/auth/guards";
 import { ToastNotice } from "@/components/toast-notice";
+import { SearchIcon, TagIcon } from "@/components/ui-icons";
 import type { ProductView } from "@/lib/api/types";
 
 interface ProdutosPageProps {
@@ -173,7 +174,7 @@ export default async function ProdutosPage({ searchParams }: ProdutosPageProps) 
 
   return (
     <section className="space-y-6">
-      <header>
+      <header className="rounded-[1.75rem] border border-slate-900/10 bg-white/65 p-6 shadow-sm">
         <p className="text-xs uppercase tracking-[0.3em] text-[#9f2f2f]">Administracao</p>
         <h1 className="mt-2 text-3xl font-semibold">Catalogo</h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-700">
@@ -187,7 +188,10 @@ export default async function ProdutosPage({ searchParams }: ProdutosPageProps) 
       <div className="flex flex-col gap-4 rounded-[1.75rem] border border-slate-900/10 bg-white/80 p-6 shadow-sm lg:flex-row lg:items-end lg:justify-between">
         <form className="grid flex-1 gap-3 md:grid-cols-[1fr_220px]">
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-800">Buscar</span>
+            <span className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-800">
+              <SearchIcon className="h-4 w-4 text-[#16353f]" />
+              Buscar
+            </span>
             <input
               name="search"
               defaultValue={search}
@@ -336,7 +340,10 @@ export default async function ProdutosPage({ searchParams }: ProdutosPageProps) 
                     <td className="px-6 py-4 font-medium text-slate-700">{item.sku}</td>
                     <td className="px-6 py-4">
                       <div className="min-w-[14rem]">
-                        <p className="font-semibold text-slate-950">{item.name}</p>
+                        <p className="flex items-center gap-2 font-semibold text-slate-950">
+                          <TagIcon className="h-4 w-4 text-[#16353f]" />
+                          {item.name}
+                        </p>
                         {item.tracksExpiration ? (
                           <p className="mt-1 text-xs text-slate-500">Controla validade por lote</p>
                         ) : (

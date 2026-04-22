@@ -20,3 +20,9 @@ textarea,
 button {
   font: inherit;
 }
+
+/* Hide native password reveal controls so only the custom toggle is shown. */
+.password-field-input::-ms-reveal,
+.password-field-input::-ms-clear {
+  display: none;
+}

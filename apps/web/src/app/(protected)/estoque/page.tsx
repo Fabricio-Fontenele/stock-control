@@ -2,8 +2,10 @@ import type { Route } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { apiFetch, BackendError } from "@/lib/api/backend";
+import { getSession } from "@/lib/auth/session";
 import { EmptyState } from "@/components/empty-state";
 import { FeedbackBanner } from "@/components/feedback-banner";
+import { ArrowOutIcon, PlusIcon, SearchIcon } from "@/components/ui-icons";
 import type { ProductStockView } from "@/lib/api/types";
 
 interface EstoquePageProps {
@@ -86,6 +88,10 @@ function buildStockExitHref(params: {
   return (`/estoque/saida?${query.toString()}`) as Route;
 }
 
+function buildStockEntryHref(productId: string): Route {
+  return (`/entradas?productId=${productId}`) as Route;
+}
+
 export default async function EstoquePage({ searchParams }: EstoquePageProps) {
   const params = await searchParams;
   const search = params.search?.trim() ?? "";
@@ -117,6 +123,9 @@ export default async function EstoquePage({ searchParams }: EstoquePageProps) {
       errorMessage = "Falha ao consultar estoque";
     }
   }
+
+  const session = await getSession();
+  const isAdmin = session?.user.role === "admin";
 
   const currencyFormatter = new Intl.NumberFormat("pt-BR", {
     style: "currency",
@@ -153,7 +162,7 @@ export default async function EstoquePage({ searchParams }: EstoquePageProps) {
 
   return (
     <section className="space-y-6">
-      <header>
+      <header className="rounded-[1.75rem] border border-slate-900/10 bg-white/65 p-6 shadow-sm">
         <p className="text-xs uppercase tracking-[0.3em] text-[#9f2f2f]">Operacao</p>
         <h1 className="mt-2 text-3xl font-semibold">Estoque</h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-700">
@@ -164,7 +173,8 @@ export default async function EstoquePage({ searchParams }: EstoquePageProps) {
 
       <form className="rounded-[1.75rem] border border-slate-900/10 bg-white/80 p-6 shadow-sm">
         <label className="block">
-          <span className="mb-2 block text-sm font-medium text-slate-800">
+          <span className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-800">
+            <SearchIcon className="h-4 w-4 text-[#16353f]" />
             Filtrar estoque
           </span>
           <div className="grid gap-3 lg:grid-cols-[minmax(0,1.8fr)_0.8fr_0.7fr_0.7fr_auto]">
@@ -247,6 +257,15 @@ export default async function EstoquePage({ searchParams }: EstoquePageProps) {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              {isAdmin ? (
+                <Link
+                  href="/entradas"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-[#16353f] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0f2a33]"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  Entrada
+                </Link>
+              ) : null}
               <p className="text-xs text-slate-500">
                 {pageLabelStart}-{pageLabelEnd} de {totalItems}
               </p>
@@ -263,6 +282,7 @@ export default async function EstoquePage({ searchParams }: EstoquePageProps) {
                   <th className="px-6 py-4 font-semibold">Quantidade em estoque</th>
                   <th className="px-6 py-4 font-semibold">Valor de venda</th>
                   <th className="px-6 py-4 font-semibold">Ultima atualizacao</th>
+                  <th className="px-6 py-4 font-semibold text-right">Acao</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -319,6 +339,26 @@ export default async function EstoquePage({ searchParams }: EstoquePageProps) {
                       <Link href={exitHref} className="block">
                         {dateTimeFormatter.format(new Date(item.updatedAt))}
                       </Link>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        {isAdmin ? (
+                          <Link
+                            href={buildStockEntryHref(item.id)}
+                            className="inline-flex items-center gap-1 rounded-xl bg-[#16353f] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#0f2a33]"
+                          >
+                            <PlusIcon className="h-3.5 w-3.5" />
+                            Entrada
+                          </Link>
+                        ) : null}
+                        <Link
+                          href={exitHref}
+                          className="inline-flex items-center gap-1 rounded-xl border border-slate-900/10 px-3 py-2 text-xs font-semibold text-slate-800 transition hover:bg-slate-100"
+                        >
+                          <ArrowOutIcon className="h-3.5 w-3.5" />
+                          Saida
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 )})}

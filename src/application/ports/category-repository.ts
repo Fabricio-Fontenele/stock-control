@@ -6,4 +6,5 @@ export interface CategoryRepository {
   findById(id: CategoryId): Promise<Category | null>;
   findByName(name: string): Promise<Category | null>;
   list(): Promise<Category[]>;
+  delete(id: CategoryId): Promise<void>;
 }

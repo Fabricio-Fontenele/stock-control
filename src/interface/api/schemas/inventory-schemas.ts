@@ -5,10 +5,8 @@ const entryReasonSchema = z.enum(["supplier-purchase", "restock"]);
 
 export const inventoryEntrySchema = z.object({
   productId: z.string().uuid(),
-  lotCode: z.string().min(1).optional(),
   quantity: z.number().positive(),
   entryDate: z.coerce.date(),
-  expirationDate: z.coerce.date().nullable().optional(),
   reasonType: entryReasonSchema,
   notes: z.string().max(500).nullable().optional()
 });
