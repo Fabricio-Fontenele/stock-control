@@ -22,7 +22,6 @@ HTTP-only e foco em operacao + administracao.
 - Frontend MVP em andamento:
   - login e sessao protegida no Next
   - estoque como fluxo principal de operacao, com listagem inicial, filtro, ordenacao, paginacao leve e clique no produto para registrar saida
-  - alertas administrativos
   - categorias, fornecedores, catalogo em tabela com ordenacao por coluna e entradas por lote
   - refinamentos de UX para estados vazios, toasts de feedback e navegacao operacional
   - cadastro de produto com SKU numerico sugerido automaticamente sem consumir a sequencia, ainda editavel, fornecedor opcional, unidade selecionavel, calculo bidirecional entre margem e preco final e reativacao de produto inativo
@@ -54,7 +53,7 @@ Pre-requisitos para smoke E2E:
 Variaveis de ambiente do frontend:
 
 - `STOCK_CONTROL_API_URL=http://127.0.0.1:3333`
-- `WEB_SESSION_SECRET=change-me-in-shared-environments`
+- `WEB_SESSION_SECRET=replace-with-a-strong-random-secret`
 
 Variaveis opcionais para smoke E2E no frontend (Playwright):
 
@@ -70,7 +69,6 @@ Fluxos ja implementados no frontend:
 - `login`
 - `estoque`
 - `estoque/saida`
-- `alertas`
 - `categorias`
 - `fornecedores`
 - `catalogo` (`/produtos`)
@@ -122,3 +120,9 @@ Populacao de catalogo realista:
 - `JWT_SECRET` default e seed com senha padrao servem apenas para desenvolvimento.
 - Antes de qualquer ambiente compartilhado, configure segredo JWT explicito e senha
   administrativa nao padrao.
+
+## CI
+
+- Workflow em [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+- Backend: `npm ci`, `npm run build`, `npm run test:unit`.
+- Web: `npm ci` em `apps/web` e `npm run build`.
