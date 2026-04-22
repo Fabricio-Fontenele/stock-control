@@ -1,7 +1,7 @@
 import { getSession } from "@/lib/auth/session";
+import { getServerApiBaseUrl } from "@/lib/env/server";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_STOCK_CONTROL_API_URL ?? "http://localhost:3000";
+const API_BASE_URL = getServerApiBaseUrl();
 
 export class BackendError extends Error {
   constructor(

@@ -1,0 +1,102 @@
+name: Deploy Staging (VPS)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  deploy:
+    name: Build and deploy to VPS staging
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/stock-control-api:${{ env.IMAGE_TAG }}
+            ghcr.io/${{ github.repository_owner }}/stock-control-api:staging-latest
+
+      - name: Build and push Web image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/web
+          file: ./apps/web/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/stock-control-web:${{ env.IMAGE_TAG }}
+            ghcr.io/${{ github.repository_owner }}/stock-control-web:staging-latest
+
+      - name: Copy compose file to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          source: docker-compose.staging.yml
+          target: ${{ secrets.VPS_DEPLOY_PATH }}
+
+      - name: Deploy on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          GHCR_OWNER: ${{ github.repository_owner }}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
+          GHCR_USERNAME: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VPS_DEPLOY_PATH: ${{ secrets.VPS_DEPLOY_PATH }}
+          STAGING_ENV_FILE: ${{ secrets.STAGING_ENV_FILE }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          envs: GHCR_OWNER,IMAGE_TAG,GHCR_USERNAME,GHCR_TOKEN,VPS_DEPLOY_PATH,STAGING_ENV_FILE
+          script: |
+            set -euo pipefail
+            mkdir -p "$VPS_DEPLOY_PATH"
+            printf '%s' "$STAGING_ENV_FILE" > "$VPS_DEPLOY_PATH/.env.staging"
+            cd "$VPS_DEPLOY_PATH"
+
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
+
+            export GHCR_OWNER="$GHCR_OWNER"
+            export IMAGE_TAG="$IMAGE_TAG"
+
+            docker compose --env-file .env.staging -f docker-compose.staging.yml pull
+            docker compose --env-file .env.staging -f docker-compose.staging.yml up -d postgres
+
+            docker compose --env-file .env.staging -f docker-compose.staging.yml run --rm api node dist/infrastructure/persistence/postgres/migrate.js
+
+            docker compose --env-file .env.staging -f docker-compose.staging.yml up -d api web
+            docker compose --env-file .env.staging -f docker-compose.staging.yml ps
+
+      - name: Run staging smoke checks
+        env:
+          STAGING_BASE_URL: ${{ secrets.STAGING_BASE_URL }}
+          STAGING_ADMIN_EMAIL: ${{ secrets.STAGING_ADMIN_EMAIL }}
+          STAGING_ADMIN_PASSWORD: ${{ secrets.STAGING_ADMIN_PASSWORD }}
+        run: ./scripts/smoke/staging-web-smoke.sh

@@ -2,11 +2,9 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { createSignedSessionValue, SESSION_COOKIE } from "@/lib/auth/session";
+import { getServerApiBaseUrl } from "@/lib/env/server";
 
-const API_BASE_URL =
-  process.env.STOCK_CONTROL_API_URL ??
-  process.env.NEXT_PUBLIC_STOCK_CONTROL_API_URL ??
-  "http://localhost:3333";
+const API_BASE_URL = getServerApiBaseUrl();
 
 export async function POST(request: Request) {
   const formData = await request.formData();

@@ -1,21 +1,12 @@
 import "dotenv/config";
 
 import { buildApp } from "./app.js";
-
-const DEFAULT_PORT = 3333;
-
-const parsePort = (value: string | undefined): number => {
-  if (!value) {
-    return DEFAULT_PORT;
-  }
-
-  const parsed = Number.parseInt(value, 10);
-  return Number.isNaN(parsed) ? DEFAULT_PORT : parsed;
-};
+import { loadEnv } from "./infrastructure/config/env.js";
 
 const start = async (): Promise<void> => {
-  const app = buildApp({ logger: true });
-  const port = parsePort(process.env.PORT);
+  const env = loadEnv();
+  const app = buildApp({ logger: true, env });
+  const port = env.PORT;
 
   try {
     await app.listen({ port, host: "0.0.0.0" });

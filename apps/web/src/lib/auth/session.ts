@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { getWebSessionSecret } from "@/lib/env/server";
 
 export const SESSION_COOKIE = "sc_session";
 
@@ -27,8 +28,7 @@ interface JwtPayload {
   exp?: number;
 }
 
-const SESSION_SECRET =
-  process.env.WEB_SESSION_SECRET ?? "dev-only-web-session-secret-change-me";
+const SESSION_SECRET = getWebSessionSecret();
 
 function toBase64Url(input: string): string {
   return Buffer.from(input).toString("base64url");

@@ -1,5 +1,6 @@
 import { PasswordField } from "@/components/password-field";
 import { BrandMark } from "@/components/brand-mark";
+import { getServerApiBaseUrl } from "@/lib/env/server";
 
 export default async function LoginPage({
   searchParams
@@ -7,10 +8,7 @@ export default async function LoginPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const params = await searchParams;
-  const apiBaseUrl =
-    process.env.STOCK_CONTROL_API_URL ??
-    process.env.NEXT_PUBLIC_STOCK_CONTROL_API_URL ??
-    "http://localhost:3333";
+  const apiBaseUrl = getServerApiBaseUrl();
   const errorMessage =
     params.error === "invalid_credentials"
       ? "Credenciais invalidas. Verifique e tente novamente."

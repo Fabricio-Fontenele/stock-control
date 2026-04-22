@@ -1,5 +1,7 @@
 import Fastify, { type FastifyInstance } from "fastify";
 
+import type { Env } from "./infrastructure/config/env.js";
+import { loadEnv } from "./infrastructure/config/env.js";
 import authPlugin from "./interface/api/plugins/auth.js";
 import databasePlugin from "./interface/api/plugins/database.js";
 import errorHandlerPlugin from "./interface/api/plugins/error-handler.js";
@@ -14,6 +16,7 @@ import userRoutes from "./interface/api/routes/user-routes.js";
 
 export interface BuildAppOptions {
   logger?: boolean;
+  env?: Env;
 }
 
 const SECURITY_HEADERS = {
@@ -24,11 +27,47 @@ const SECURITY_HEADERS = {
 } as const;
 
 export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
+  const env = options.env ?? loadEnv();
+  const allowedOrigins = env.CORS_ALLOWED_ORIGINS
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter((origin) => origin.length > 0);
+  const allowedOriginsSet = new Set(allowedOrigins);
+
+  const resolveAllowedOrigin = (origin: string | undefined): string | null => {
+    if (!origin) {
+      return null;
+    }
+
+    return allowedOriginsSet.has(origin) ? origin : null;
+  };
+
   const app = Fastify({
     logger: options.logger ?? true
   });
 
-  app.addHook("onRequest", async (request) => {
+  app.addHook("onRequest", async (request, reply) => {
+    const requestOrigin = typeof request.headers.origin === "string"
+      ? request.headers.origin
+      : undefined;
+    const allowedOrigin = resolveAllowedOrigin(requestOrigin);
+
+    if (request.method === "OPTIONS") {
+      if (!requestOrigin || !allowedOrigin) {
+        return reply.status(403).send();
+      }
+
+      reply
+        .header("vary", "origin")
+        .header("access-control-allow-origin", allowedOrigin)
+        .header("access-control-allow-methods", "GET,POST,PATCH,DELETE,OPTIONS")
+        .header("access-control-allow-headers", "content-type,authorization")
+        .header("access-control-max-age", "86400")
+        .status(204);
+
+      return reply.send();
+    }
+
     request.log.info(
       {
         method: request.method,
@@ -39,8 +78,21 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   });
 
   app.addHook("onSend", async (request, reply, payload) => {
+    const requestOrigin = typeof request.headers.origin === "string"
+      ? request.headers.origin
+      : undefined;
+    const allowedOrigin = resolveAllowedOrigin(requestOrigin);
+
     for (const [header, value] of Object.entries(SECURITY_HEADERS)) {
       reply.header(header, value);
+    }
+
+    if (allowedOrigin) {
+      reply
+        .header("vary", "origin")
+        .header("access-control-allow-origin", allowedOrigin)
+        .header("access-control-allow-methods", "GET,POST,PATCH,DELETE,OPTIONS")
+        .header("access-control-allow-headers", "content-type,authorization");
     }
 
     if (request.protocol === "https") {
