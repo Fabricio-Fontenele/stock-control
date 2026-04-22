@@ -20,7 +20,8 @@
     "db:down": "docker compose down",
     "db:logs": "docker compose logs -f postgres",
     "db:migrate": "tsx src/infrastructure/persistence/postgres/migrate.ts",
-    "db:seed:admin": "tsx src/infrastructure/persistence/postgres/seed-admin.ts"
+    "db:seed:admin": "tsx src/infrastructure/persistence/postgres/seed-admin.ts",
+    "db:seed:catalog": "tsx src/infrastructure/persistence/postgres/seed-catalog.ts"
   },
   "dependencies": {
     "@fastify/jwt": "^9.1.0",

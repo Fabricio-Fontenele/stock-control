@@ -82,11 +82,17 @@ Fluxos ja implementados no frontend:
 npm run db:up
 npm run db:migrate
 npm run db:seed:admin
+npm run db:seed:catalog
 ```
 
 Credenciais padrao de desenvolvimento:
 
 - `admin@conveniencia.local` / `admin123`
+
+Populacao de catalogo realista:
+
+- `npm run db:seed:catalog` limpa categorias/fornecedores/produtos/estoque e repovoa com itens de conveniencia.
+- SKUs gerados no seed de catalogo sao numericos, sequenciais e com 13 digitos.
 
 ## Endpoints Principais
 
