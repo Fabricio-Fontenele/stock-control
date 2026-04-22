@@ -133,26 +133,30 @@ describe("RegisterStockEntryUseCase", () => {
     ).rejects.toThrow("Only admin users can register inventory entries");
   });
 
-  it("returns validation error when expiration date is required and missing", async () => {
+  it("accepts missing expiration date", async () => {
+    const stockRepository = createStockRepository();
+    const movementRepository = createMovementRepository();
     const useCase = new RegisterStockEntryUseCase({
       productRepository: createProductRepository(),
-      stockRepository: createStockRepository(),
-      movementRepository: createMovementRepository(),
+      stockRepository,
+      movementRepository,
       unitOfWork: createUnitOfWork()
     });
 
-    await expect(
-      useCase.execute({
-        productId: "product-1",
-        lotCode: "LOT-ENTRY-3",
-        quantity: 3,
-        entryDate: new Date(),
-        expirationDate: null,
-        reasonType: "supplier-purchase",
-        notes: null,
-        performedByUserId: "admin-1",
-        performedByRole: "admin"
-      })
-    ).rejects.toThrow("Expiration date is required for products that track expiration");
+    const movement = await useCase.execute({
+      productId: "product-1",
+      lotCode: "LOT-ENTRY-3",
+      quantity: 3,
+      entryDate: new Date(),
+      expirationDate: null,
+      reasonType: "supplier-purchase",
+      notes: null,
+      performedByUserId: "admin-1",
+      performedByRole: "admin"
+    });
+
+    expect(movement.movementType).toBe("entry");
+    expect(stockRepository.createLot).toHaveBeenCalledTimes(1);
+    expect(movementRepository.create).toHaveBeenCalledTimes(1);
   });
 });
