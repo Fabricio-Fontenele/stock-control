@@ -4,19 +4,26 @@ import Link from "next/link";
 
 import { apiFetch, BackendError } from "@/lib/api/backend";
 import { FeedbackBanner } from "@/components/feedback-banner";
+import { getSession } from "@/lib/auth/session";
 import type { ExitResponse, ProductStockView } from "@/lib/api/types";
 
 async function createQuickExitAction(formData: FormData) {
   "use server";
 
   try {
+    const session = await getSession();
+    const reasonType =
+      session?.user.role === "employee"
+        ? "sale"
+        : String(formData.get("reasonType") ?? "");
+
     await apiFetch<ExitResponse>("/inventory/exits", {
       method: "POST",
       authenticated: true,
       body: JSON.stringify({
         productId: String(formData.get("productId") ?? ""),
         quantity: Number(formData.get("quantity") ?? 0),
-        reasonType: String(formData.get("reasonType") ?? ""),
+        reasonType,
         notes: String(formData.get("notes") ?? "") || null
       })
     });
@@ -43,6 +50,8 @@ interface SaidaRapidaPageProps {
 export default async function SaidaRapidaPage({ searchParams }: SaidaRapidaPageProps) {
   const params = await searchParams;
   const productId = params.productId;
+  const session = await getSession();
+  const isEmployee = session?.user.role === "employee";
 
   let product: ProductStockView | null = null;
   let loadError: string | null = null;
@@ -68,7 +77,7 @@ export default async function SaidaRapidaPage({ searchParams }: SaidaRapidaPageP
 
   return (
     <section className="space-y-6">
-      <header className="rounded-[1.75rem] border border-slate-900/10 bg-white/65 p-6 shadow-sm">
+      <header className="hero-card p-6">
         <p className="text-xs uppercase tracking-[0.3em] text-[#9f2f2f]">Operacao</p>
         <h1 className="mt-2 text-3xl font-semibold">Registrar saida</h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-700">
@@ -89,7 +98,7 @@ export default async function SaidaRapidaPage({ searchParams }: SaidaRapidaPageP
       {product ? (
         <form
           action={createQuickExitAction}
-          className="grid gap-4 rounded-[1.75rem] border border-slate-900/10 bg-white/80 p-6 shadow-sm md:grid-cols-2"
+          className="surface-card grid gap-4 p-6 md:grid-cols-2"
         >
           <input type="hidden" name="productId" value={product.id} />
 
@@ -103,30 +112,34 @@ export default async function SaidaRapidaPage({ searchParams }: SaidaRapidaPageP
             </p>
           </div>
 
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-800">Tipo de saida</span>
-            <select
-              name="reasonType"
-              required
-              defaultValue="sale"
-              className="w-full rounded-2xl border border-slate-300 px-4 py-3"
-            >
-              <option value="sale">Venda</option>
-              <option value="loss">Perda</option>
-              <option value="breakage">Quebra</option>
-              <option value="expiration">Vencimento</option>
-            </select>
-          </label>
+          {isEmployee ? (
+            <input type="hidden" name="reasonType" value="sale" />
+          ) : (
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-slate-800">Tipo de saida</span>
+              <select
+                name="reasonType"
+                required
+                defaultValue="sale"
+                className="w-full rounded-2xl px-4 py-3"
+              >
+                <option value="sale">Venda</option>
+                <option value="loss">Perda</option>
+                <option value="breakage">Quebra</option>
+                <option value="expiration">Vencimento</option>
+              </select>
+            </label>
+          )}
 
           <label className="block">
             <span className="mb-2 block text-sm font-medium text-slate-800">Quantidade</span>
             <input
               name="quantity"
               type="number"
-              step="0.01"
-              min="0.01"
+              step="1"
+              min="1"
               required
-              className="w-full rounded-2xl border border-slate-300 px-4 py-3"
+              className="w-full rounded-2xl px-4 py-3"
             />
           </label>
 
@@ -137,7 +150,7 @@ export default async function SaidaRapidaPage({ searchParams }: SaidaRapidaPageP
             <textarea
               name="notes"
               rows={3}
-              className="w-full rounded-2xl border border-slate-300 px-4 py-3"
+              className="w-full rounded-2xl px-4 py-3"
               placeholder="Opcional"
             />
           </label>
@@ -145,20 +158,20 @@ export default async function SaidaRapidaPage({ searchParams }: SaidaRapidaPageP
           <div className="md:col-span-2 flex items-center gap-3">
             <button
               type="submit"
-              className="inline-flex items-center gap-2 rounded-2xl bg-[#9f2f2f] px-5 py-3 font-semibold text-white transition hover:bg-[#842626]"
+              className="btn-accent inline-flex items-center gap-2 rounded-2xl px-5 py-3 font-semibold"
             >
               Registrar saida
             </button>
             <Link
               href="/estoque"
-              className="rounded-2xl border border-slate-900/10 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-100"
+              className="btn-ghost rounded-2xl px-5 py-3 text-sm font-semibold text-slate-800"
             >
               Voltar para estoque
             </Link>
           </div>
         </form>
       ) : (
-        <div className="rounded-[1.75rem] bg-[#16353f] p-6 text-white shadow-sm">
+        <div className="rounded-[1.75rem] bg-[linear-gradient(165deg,#163b44_0%,#0f2f36_100%)] p-6 text-white shadow-sm">
           <p className="text-xs uppercase tracking-[0.25em] text-slate-200">
             Fluxo operacional
           </p>

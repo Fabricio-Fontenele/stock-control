@@ -177,6 +177,29 @@ describe("RegisterQuickExitUseCase", () => {
     expect(movementRepository.createRejectedAttempt).toHaveBeenCalledTimes(1);
   });
 
+  it("blocks employee when quick-exit reason is not sale", async () => {
+    const movementRepository = createMovementRepository();
+    const useCase = new RegisterQuickExitUseCase({
+      productRepository: createProductRepository(),
+      stockRepository: createStockRepository([createStockLot({ id: "lot-1" })]),
+      movementRepository,
+      unitOfWork: createUnitOfWork()
+    });
+
+    await expect(
+      useCase.execute({
+        productId: "product-1",
+        quantity: 1,
+        reasonType: "loss",
+        notes: null,
+        performedByUserId: "user-1",
+        performedByRole: "employee"
+      })
+    ).rejects.toThrow("Employees can only register exits as sale");
+
+    expect(movementRepository.createRejectedAttempt).toHaveBeenCalledTimes(1);
+  });
+
   it("returns internal error when rejected-attempt audit cannot be persisted", async () => {
     const movementRepository = createMovementRepository();
     (movementRepository.createRejectedAttempt as ReturnType<typeof vi.fn>).mockRejectedValueOnce(

@@ -51,6 +51,11 @@ export class RegisterQuickExitUseCase {
       throw new HttpError(400, "Quick exit reason is invalid");
     }
 
+    if (input.performedByRole === USER_ROLE.EMPLOYEE && input.reasonType !== STOCK_MOVEMENT_REASON.SALE) {
+      await this.logRejectedAttemptOrFail(input, "Employees can only register exits as sale");
+      throw new HttpError(403, "Employees can only register exits as sale");
+    }
+
     const product = await this.deps.productRepository.findById(input.productId);
 
     if (!product) {

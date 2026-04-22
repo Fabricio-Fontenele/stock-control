@@ -74,7 +74,7 @@ export default async function EntradasPage({ searchParams }: EntradasPageProps) 
 
   return (
     <section className="space-y-6">
-      <header className="rounded-[1.75rem] border border-slate-900/10 bg-white/65 p-6 shadow-sm">
+      <header className="hero-card p-6">
         <p className="text-xs uppercase tracking-[0.3em] text-[#9f2f2f]">Administracao</p>
         <h1 className="mt-2 text-3xl font-semibold">Entrada de estoque</h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-700">
@@ -91,7 +91,7 @@ export default async function EntradasPage({ searchParams }: EntradasPageProps) 
       {product ? (
         <form
           action={createEntryAction}
-          className="grid gap-4 rounded-[1.75rem] border border-slate-900/10 bg-white/80 p-6 shadow-sm md:grid-cols-2"
+          className="surface-card grid gap-4 p-6 md:grid-cols-2"
         >
           <input type="hidden" name="productId" value={product.id} />
 
@@ -113,7 +113,7 @@ export default async function EntradasPage({ searchParams }: EntradasPageProps) 
               name="reasonType"
               required
               defaultValue="supplier-purchase"
-              className="w-full rounded-2xl border border-slate-300 px-4 py-3"
+              className="w-full rounded-2xl px-4 py-3"
             >
               <option value="supplier-purchase">Compra de fornecedor</option>
               <option value="restock">Reposicao</option>
@@ -125,10 +125,10 @@ export default async function EntradasPage({ searchParams }: EntradasPageProps) 
             <input
               name="quantity"
               type="number"
-              step="0.01"
-              min="0.01"
+              step="1"
+              min="1"
               required
-              className="w-full rounded-2xl border border-slate-300 px-4 py-3"
+              className="w-full rounded-2xl px-4 py-3"
             />
           </label>
 
@@ -139,7 +139,7 @@ export default async function EntradasPage({ searchParams }: EntradasPageProps) 
             <textarea
               name="notes"
               rows={3}
-              className="w-full rounded-2xl border border-slate-300 px-4 py-3"
+              className="w-full rounded-2xl px-4 py-3"
               placeholder="Opcional"
             />
           </label>
@@ -147,21 +147,21 @@ export default async function EntradasPage({ searchParams }: EntradasPageProps) 
           <div className="md:col-span-2 flex items-center gap-3">
             <button
               type="submit"
-              className="inline-flex items-center gap-2 rounded-2xl bg-[#9f2f2f] px-5 py-3 font-semibold text-white transition hover:bg-[#842626]"
+              className="btn-accent inline-flex items-center gap-2 rounded-2xl px-5 py-3 font-semibold"
             >
               <ArrowOutIcon className="h-4 w-4" />
               Registrar entrada
             </button>
             <Link
               href="/estoque"
-              className="rounded-2xl border border-slate-900/10 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-100"
+              className="btn-ghost rounded-2xl px-5 py-3 text-sm font-semibold text-slate-800"
             >
               Voltar para estoque
             </Link>
           </div>
         </form>
       ) : (
-        <div className="rounded-[1.75rem] bg-[#16353f] p-6 text-white shadow-sm">
+        <div className="rounded-[1.75rem] bg-[linear-gradient(165deg,#163b44_0%,#0f2f36_100%)] p-6 text-white shadow-sm">
           <p className="text-xs uppercase tracking-[0.25em] text-slate-200">
             Fluxo operacional
           </p>
