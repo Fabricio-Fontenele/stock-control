@@ -108,7 +108,7 @@ async function changePasswordAction(formData: FormData) {
 
 function UserCard({ user }: { user: UserItem }) {
   return (
-    <article className="rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-sm transition hover:shadow-md">
+    <article className="surface-card p-5 transition hover:shadow-md">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#16353f] text-white shadow-sm">
@@ -148,7 +148,7 @@ function UserCard({ user }: { user: UserItem }) {
               <input type="hidden" name="userId" value={user.id} />
               <button
                 type="submit"
-                className="rounded-xl border border-red-200 px-3 py-2 text-xs font-medium text-red-600 transition hover:bg-red-50"
+              className="rounded-xl border border-red-200 px-3 py-2 text-xs font-medium text-red-600 transition hover:bg-red-50"
               >
                 Excluir
               </button>
@@ -164,7 +164,7 @@ function UserCard({ user }: { user: UserItem }) {
             />
             <button
               type="submit"
-              className="rounded-xl border border-blue-200 px-3 py-2 text-xs font-medium text-blue-700 transition hover:bg-blue-50"
+              className="btn-ghost rounded-xl border-blue-200 px-3 py-2 text-xs font-medium text-blue-700 hover:bg-blue-50"
             >
               Salvar
             </button>
@@ -190,7 +190,7 @@ export default async function FuncionariosPage({
 
   return (
     <section className="space-y-6">
-      <header className="rounded-3xl border border-slate-900/10 bg-white/70 p-6 shadow-sm">
+      <header className="hero-card p-6">
         <p className="text-xs uppercase tracking-[0.3em] text-[#9f2f2f]">Administracao</p>
         <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
           <h1 className="text-3xl font-semibold text-slate-950">Funcionarios</h1>
@@ -227,33 +227,33 @@ export default async function FuncionariosPage({
 
       <form
         action={createUserAction}
-        className="grid gap-3 rounded-3xl border border-slate-900/10 bg-white/90 p-6 shadow-sm md:grid-cols-2 xl:grid-cols-[1.1fr_1.1fr_1fr_auto_auto]"
+        className="surface-card grid gap-3 p-6 md:grid-cols-2 xl:grid-cols-[1.1fr_1.1fr_1fr_auto_auto]"
       >
         <input
           name="name"
           required
           placeholder="Nome completo"
-          className="rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+          className="rounded-2xl px-4 py-3 text-sm"
         />
         <input
           name="email"
           type="email"
           required
           placeholder="E-mail"
-          className="rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+          className="rounded-2xl px-4 py-3 text-sm"
         />
         <PasswordField
           name="password"
           placeholder="Senha"
-          className="rounded-2xl border border-slate-300 px-4 py-3 text-sm"
+          className="rounded-2xl px-4 py-3 text-sm"
         />
-        <select name="role" className="rounded-2xl border border-slate-300 px-4 py-3 text-sm">
+        <select name="role" className="rounded-2xl px-4 py-3 text-sm">
           <option value="employee">Funcionario</option>
           <option value="admin">Admin</option>
         </select>
         <button
           type="submit"
-          className="rounded-2xl bg-[#9f2f2f] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#842626]"
+          className="btn-accent rounded-2xl px-5 py-3 text-sm font-semibold"
         >
           Adicionar
         </button>

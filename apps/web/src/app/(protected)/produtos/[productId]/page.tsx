@@ -104,20 +104,20 @@ export default async function EditarProdutoPage({
 
   return (
     <section className="space-y-6">
-      <header className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+      <header className="hero-card flex flex-col gap-3 p-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.3em] text-[#9f2f2f]">Administracao</p>
           <h1 className="mt-2 text-3xl font-semibold">Editar produto</h1>
         </div>
         <Link
           href="/produtos"
-          className="inline-flex rounded-2xl border border-slate-900/10 px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
+          className="btn-ghost inline-flex rounded-2xl px-4 py-3 text-sm font-semibold text-slate-900"
         >
           Voltar para produtos
         </Link>
       </header>
 
-      <div className="flex flex-wrap items-center gap-3 rounded-[1.75rem] border border-slate-900/10 bg-white/80 p-5 shadow-sm">
+      <div className="surface-card flex flex-wrap items-center gap-3 p-5">
         <span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold uppercase text-white">
           {product.status}
         </span>
@@ -129,7 +129,7 @@ export default async function EditarProdutoPage({
             <input type="hidden" name="productId" value={product.id} />
             <button
               type="submit"
-              className="rounded-2xl bg-[#9f2f2f] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#842626]"
+              className="btn-accent rounded-2xl px-4 py-3 text-sm font-semibold"
             >
               Desativar produto
             </button>
@@ -139,7 +139,7 @@ export default async function EditarProdutoPage({
             <input type="hidden" name="productId" value={product.id} />
             <button
               type="submit"
-              className="rounded-2xl bg-[#16353f] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#0f2a33]"
+              className="btn-brand rounded-2xl px-4 py-3 text-sm font-semibold"
             >
               Reativar produto
             </button>

@@ -9,9 +9,9 @@ interface ToastNoticeProps {
 }
 
 const toneClasses: Record<NonNullable<ToastNoticeProps["tone"]>, string> = {
-  success: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  error: "border-red-200 bg-red-50 text-red-700",
-  info: "border-slate-200 bg-slate-50 text-slate-700"
+  success: "border-emerald-200 bg-emerald-50/95 text-emerald-800",
+  error: "border-red-200 bg-red-50/95 text-red-800",
+  info: "border-slate-200 bg-slate-50/95 text-slate-800"
 };
 
 const toneIcons = {
@@ -44,9 +44,9 @@ export function ToastNotice({
   return (
     <div className="pointer-events-none fixed right-5 top-5 z-50">
       <div
-        className={`pointer-events-auto min-w-[20rem] max-w-sm rounded-3xl border px-5 py-4 text-sm shadow-lg backdrop-blur ${toneClasses[tone]}`}
+        className={`pointer-events-auto min-w-[20rem] max-w-sm rounded-2xl border px-5 py-4 text-sm shadow-xl shadow-slate-900/10 backdrop-blur ${toneClasses[tone]}`}
       >
-        <p className="flex items-start gap-2 font-medium">
+        <p className="flex items-start gap-2.5 font-medium">
           <Icon className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{message}</span>
         </p>

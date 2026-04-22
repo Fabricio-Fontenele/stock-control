@@ -66,7 +66,7 @@ interface SupplierCardProps {
 
 function SupplierCard({ supplier }: SupplierCardProps) {
   return (
-    <div className="rounded-[1.75rem] border border-slate-900/10 bg-white/80 p-5 shadow-sm">
+    <div className="surface-card p-5">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#16353f] text-white">
@@ -91,7 +91,7 @@ function SupplierCard({ supplier }: SupplierCardProps) {
         </form>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-2 text-sm sm:grid-cols-3">
+      <div className="mt-4 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
         {supplier.contactName && (
           <div>
             <span className="text-xs text-slate-500">Contato</span>
@@ -105,9 +105,9 @@ function SupplierCard({ supplier }: SupplierCardProps) {
           </div>
         )}
         {supplier.email && (
-          <div>
+          <div className="min-w-0 sm:col-span-2">
             <span className="text-xs text-slate-500">E-mail</span>
-            <p className="font-medium text-slate-800">{supplier.email}</p>
+            <p className="break-all font-medium text-slate-800">{supplier.email}</p>
           </div>
         )}
       </div>
@@ -129,7 +129,7 @@ export default async function FornecedoresPage({
 
   return (
     <section className="space-y-6">
-      <header className="rounded-[1.75rem] border border-slate-900/10 bg-white/65 p-6 shadow-sm">
+      <header className="hero-card p-6">
         <p className="text-xs uppercase tracking-[0.3em] text-[#9f2f2f]">Administracao</p>
         <h1 className="mt-2 text-3xl font-semibold">Fornecedores</h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-700">
@@ -145,14 +145,14 @@ export default async function FornecedoresPage({
         <ToastNotice tone="success" message="Fornecedor excluido com sucesso." />
       ) : null}
 
-      <form action={createSupplierAction} className="grid gap-4 rounded-[1.75rem] border border-slate-900/10 bg-white/80 p-6 shadow-sm md:grid-cols-2 xl:grid-cols-5">
-        <input name="name" required placeholder="Nome" className="rounded-2xl border border-slate-300 px-4 py-3" />
-        <input name="document" placeholder="CNPJ/CPF" className="rounded-2xl border border-slate-300 px-4 py-3" />
-        <input name="contactName" placeholder="Nome do contato" className="rounded-2xl border border-slate-300 px-4 py-3" />
-        <input name="phone" placeholder="Telefone" className="rounded-2xl border border-slate-300 px-4 py-3" />
+      <form action={createSupplierAction} className="surface-card grid gap-4 p-6 md:grid-cols-2 xl:grid-cols-5">
+        <input name="name" required placeholder="Nome" className="rounded-2xl px-4 py-3" />
+        <input name="document" placeholder="CNPJ/CPF" className="rounded-2xl px-4 py-3" />
+        <input name="contactName" placeholder="Nome do contato" className="rounded-2xl px-4 py-3" />
+        <input name="phone" placeholder="Telefone" className="rounded-2xl px-4 py-3" />
         <div className="flex gap-3 xl:col-span-5">
-          <input name="email" type="email" placeholder="E-mail" className="flex-1 rounded-2xl border border-slate-300 px-4 py-3" />
-          <button type="submit" className="rounded-2xl bg-[#9f2f2f] px-5 py-3 font-semibold text-white transition hover:bg-[#842626]">
+          <input name="email" type="email" placeholder="E-mail" className="flex-1 rounded-2xl px-4 py-3" />
+          <button type="submit" className="btn-accent rounded-2xl px-5 py-3 font-semibold">
             Criar fornecedor
           </button>
         </div>

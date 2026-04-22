@@ -5,7 +5,7 @@ import { apiFetch } from "@/lib/api/backend";
 import { EmptyState } from "@/components/empty-state";
 import { requireAdminSession } from "@/lib/auth/guards";
 import { ToastNotice } from "@/components/toast-notice";
-import { SearchIcon, TagIcon } from "@/components/ui-icons";
+import { SearchIcon } from "@/components/ui-icons";
 import type { ProductView } from "@/lib/api/types";
 
 interface ProdutosPageProps {
@@ -174,7 +174,7 @@ export default async function ProdutosPage({ searchParams }: ProdutosPageProps) 
 
   return (
     <section className="space-y-6">
-      <header className="rounded-[1.75rem] border border-slate-900/10 bg-white/65 p-6 shadow-sm">
+      <header className="hero-card p-6">
         <p className="text-xs uppercase tracking-[0.3em] text-[#9f2f2f]">Administracao</p>
         <h1 className="mt-2 text-3xl font-semibold">Catalogo</h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-700">
@@ -185,7 +185,7 @@ export default async function ProdutosPage({ searchParams }: ProdutosPageProps) 
 
       {toastMessage ? <ToastNotice tone="success" message={toastMessage} /> : null}
 
-      <div className="flex flex-col gap-4 rounded-[1.75rem] border border-slate-900/10 bg-white/80 p-6 shadow-sm lg:flex-row lg:items-end lg:justify-between">
+      <div className="surface-card flex flex-col gap-4 p-6 lg:flex-row lg:items-end lg:justify-between">
         <form className="grid flex-1 gap-3 md:grid-cols-[1fr_220px]">
           <label className="block">
             <span className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-800">
@@ -196,7 +196,7 @@ export default async function ProdutosPage({ searchParams }: ProdutosPageProps) 
               name="search"
               defaultValue={search}
               placeholder="SKU ou nome"
-              className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-[#16353f]"
+              className="w-full rounded-2xl bg-white px-4 py-3"
             />
           </label>
           <label className="block">
@@ -204,7 +204,7 @@ export default async function ProdutosPage({ searchParams }: ProdutosPageProps) 
             <select
               name="status"
               defaultValue={status}
-              className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-[#16353f]"
+              className="w-full rounded-2xl bg-white px-4 py-3"
             >
               <option value="">Todos</option>
               <option value="active">Ativos</option>
@@ -213,7 +213,7 @@ export default async function ProdutosPage({ searchParams }: ProdutosPageProps) 
           </label>
           <button
             type="submit"
-            className="rounded-2xl bg-[#16353f] px-5 py-3 font-semibold text-white transition hover:bg-[#0f2a33] md:col-span-2 md:w-fit"
+            className="btn-brand rounded-2xl px-5 py-3 font-semibold md:col-span-2 md:w-fit"
           >
             Filtrar
           </button>
@@ -221,7 +221,7 @@ export default async function ProdutosPage({ searchParams }: ProdutosPageProps) 
 
         <Link
           href={"/produtos/novo" as Route}
-          className="inline-flex rounded-2xl bg-[#9f2f2f] px-5 py-3 font-semibold text-white transition hover:bg-[#842626]"
+          className="btn-accent inline-flex rounded-2xl px-5 py-3 font-semibold"
         >
           Novo produto
         </Link>
@@ -237,7 +237,7 @@ export default async function ProdutosPage({ searchParams }: ProdutosPageProps) 
       ) : null}
 
       {response.items.length > 0 ? (
-        <div className="overflow-hidden rounded-[1.75rem] border border-slate-900/10 bg-white/80 shadow-sm">
+        <div className="surface-card overflow-hidden">
           <div className="flex items-center justify-between border-b border-slate-900/10 px-6 py-4">
             <div>
               <p className="text-xs uppercase tracking-[0.25em] text-slate-500">
@@ -248,15 +248,38 @@ export default async function ProdutosPage({ searchParams }: ProdutosPageProps) 
                 {items.length === 1 ? "produto encontrado" : "produtos encontrados"}
               </p>
             </div>
-            <Link
-              href={"/produtos/novo" as Route}
-              className="rounded-2xl border border-slate-900/10 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
-            >
-              Novo produto
-            </Link>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="space-y-3 p-4 md:hidden">
+            {items.map((item) => (
+              <article key={item.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{item.sku}</p>
+                    <h3 className="mt-1 text-base font-semibold text-slate-950">{item.name}</h3>
+                  </div>
+                  <span className="rounded-full bg-slate-900 px-2.5 py-1 text-[11px] font-semibold uppercase text-white">
+                    {item.status}
+                  </span>
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-slate-700">
+                  <p>Unidade: {item.unitOfMeasure}</p>
+                  <p className="text-right">{currencyFormatter.format(item.salePrice)}</p>
+                  <p className="col-span-2 text-xs text-slate-500">Minimo: {item.minimumStock}</p>
+                </div>
+                <div className="mt-3">
+                  <Link
+                    href={`/produtos/${item.id}` as Route}
+                    className="btn-ghost inline-flex rounded-2xl px-4 py-2 text-xs font-semibold text-slate-900"
+                  >
+                    Editar
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div className="hidden overflow-x-auto md:block">
             <table className="min-w-full divide-y divide-slate-200 text-sm">
               <thead className="bg-slate-50/80 text-left text-xs uppercase tracking-[0.2em] text-slate-500">
                 <tr>
@@ -340,15 +363,7 @@ export default async function ProdutosPage({ searchParams }: ProdutosPageProps) 
                     <td className="px-6 py-4 font-medium text-slate-700">{item.sku}</td>
                     <td className="px-6 py-4">
                       <div className="min-w-[14rem]">
-                        <p className="flex items-center gap-2 font-semibold text-slate-950">
-                          <TagIcon className="h-4 w-4 text-[#16353f]" />
-                          {item.name}
-                        </p>
-                        {item.tracksExpiration ? (
-                          <p className="mt-1 text-xs text-slate-500">Controla validade por lote</p>
-                        ) : (
-                          <p className="mt-1 text-xs text-slate-500">Sem controle de validade</p>
-                        )}
+                        <p className="font-semibold text-slate-950">{item.name}</p>
                       </div>
                     </td>
                     <td className="px-6 py-4 font-medium text-slate-700">{item.unitOfMeasure}</td>
@@ -364,7 +379,7 @@ export default async function ProdutosPage({ searchParams }: ProdutosPageProps) 
                     <td className="px-6 py-4 text-right">
                       <Link
                         href={`/produtos/${item.id}` as Route}
-                        className="inline-flex rounded-2xl border border-slate-900/10 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
+                        className="btn-ghost inline-flex rounded-2xl px-4 py-2 text-sm font-semibold text-slate-900"
                       >
                         Editar
                       </Link>

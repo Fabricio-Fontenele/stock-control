@@ -4,8 +4,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Controle de Estoque",
-  description: "Frontend operacional para a conveniencia"
+  title: "Controle de Estoque da Conveniencia",
+  description: "Sistema web operacional e administrativo da conveniencia"
 };
 
 export default function RootLayout({

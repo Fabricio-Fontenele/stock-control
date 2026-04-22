@@ -127,7 +127,7 @@ export function ProductForm({
   return (
     <form
       action={onSubmit}
-      className="grid gap-4 rounded-[1.75rem] border border-slate-900/10 bg-white/80 p-6 shadow-sm md:grid-cols-2"
+      className="surface-card grid gap-4 p-6 md:grid-cols-2"
     >
       {initialProduct ? (
         <input type="hidden" name="productId" value={initialProduct.id} />
@@ -140,7 +140,7 @@ export function ProductForm({
           defaultValue={initialProduct?.sku ?? initialSku ?? ""}
           required
           inputMode="numeric"
-          className="w-full rounded-2xl border border-slate-300 px-4 py-3"
+          className="w-full rounded-2xl px-4 py-3"
         />
         <span className="mt-2 block text-xs text-slate-500">
           Preenchido automaticamente em sequencia numerica, mas pode ser alterado antes de salvar.
@@ -153,7 +153,7 @@ export function ProductForm({
           name="name"
           defaultValue={initialProduct?.name ?? ""}
           required
-          className="w-full rounded-2xl border border-slate-300 px-4 py-3"
+          className="w-full rounded-2xl px-4 py-3"
         />
       </label>
 
@@ -163,7 +163,7 @@ export function ProductForm({
           name="categoryId"
           defaultValue={initialProduct?.categoryId ?? ""}
           required
-          className="w-full rounded-2xl border border-slate-300 px-4 py-3"
+          className="w-full rounded-2xl px-4 py-3"
         >
           <option value="">Selecione</option>
           {categories.map((item) => (
@@ -179,7 +179,7 @@ export function ProductForm({
         <select
           name="supplierId"
           defaultValue={initialProduct?.supplierId ?? ""}
-          className="w-full rounded-2xl border border-slate-300 px-4 py-3"
+          className="w-full rounded-2xl px-4 py-3"
         >
           <option value="">Sem fornecedor</option>
           {suppliers.map((item) => (
@@ -196,7 +196,7 @@ export function ProductForm({
           name="unitOfMeasure"
           defaultValue={initialProduct?.unitOfMeasure ?? "un"}
           required
-          className="w-full rounded-2xl border border-slate-300 px-4 py-3"
+          className="w-full rounded-2xl px-4 py-3"
         >
           {UNIT_OPTIONS.map((item) => (
             <option key={item.value} value={item.value}>
@@ -217,7 +217,7 @@ export function ProductForm({
           onChange={(event) => handlePurchasePriceChange(event.target.value)}
           placeholder="0,00"
           required
-          className="w-full rounded-2xl border border-slate-300 px-4 py-3"
+          className="w-full rounded-2xl px-4 py-3"
         />
       </label>
 
@@ -231,7 +231,7 @@ export function ProductForm({
           onChange={(event) => handleMarginChange(event.target.value)}
           placeholder="0"
           required
-          className="w-full rounded-2xl border border-slate-300 px-4 py-3"
+          className="w-full rounded-2xl px-4 py-3"
         />
       </label>
 
@@ -246,7 +246,7 @@ export function ProductForm({
           onChange={(event) => handleSalePriceChange(event.target.value)}
           placeholder="0,00"
           required
-          className="w-full rounded-2xl border border-slate-300 px-4 py-3"
+          className="w-full rounded-2xl px-4 py-3"
         />
       </label>
 
@@ -260,7 +260,7 @@ export function ProductForm({
           defaultValue={initialProduct?.minimumStock ?? ""}
           placeholder="0"
           required
-          className="w-full rounded-2xl border border-slate-300 px-4 py-3"
+          className="w-full rounded-2xl px-4 py-3"
         />
       </label>
 
@@ -277,7 +277,7 @@ export function ProductForm({
       <div className="md:col-span-2">
         <button
           type="submit"
-          className="rounded-2xl bg-[#9f2f2f] px-5 py-3 font-semibold text-white transition hover:bg-[#842626]"
+          className="btn-accent rounded-2xl px-5 py-3 font-semibold"
         >
           {submitLabel}
         </button>

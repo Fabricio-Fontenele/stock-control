@@ -1,8 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f6efd8;
-  --foreground: #162228;
+  --background: #f5edd6;
+  --surface: #fffdf7;
+  --surface-2: #f8f1de;
+  --foreground: #1a2a30;
+  --muted: #5c6f76;
+  --border: #d8d2c2;
+  --brand: #18414a;
+  --brand-strong: #0f323a;
+  --accent: #a23a2f;
+  --accent-strong: #862d24;
+  --warning: #e4b74a;
 }
 
 html {
@@ -11,7 +20,20 @@ html {
 
 body {
   color: var(--foreground);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: "IBM Plex Sans", "Source Sans 3", "Segoe UI", "Noto Sans", sans-serif;
+  min-height: 100vh;
+  background:
+    radial-gradient(1300px 600px at -20% -10%, #f9f1dc 0%, transparent 70%),
+    radial-gradient(800px 500px at 110% 0%, #e8dcc0 0%, transparent 65%),
+    linear-gradient(180deg, #f6efd8 0%, #f0e5c8 100%);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: "Fraunces", "Bitter", "Iowan Old Style", "Palatino Linotype", serif;
+  letter-spacing: -0.01em;
 }
 
 input,
@@ -19,6 +41,111 @@ select,
 textarea,
 button {
   font: inherit;
+}
+
+input,
+select,
+textarea {
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: #fff;
+  color: var(--foreground);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #7b8a90;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #5f7680;
+  box-shadow: 0 0 0 3px rgba(24, 65, 74, 0.12);
+}
+
+button {
+  transition: transform 0.14s ease, filter 0.14s ease, box-shadow 0.18s ease;
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+.surface-card {
+  border: 1px solid color-mix(in srgb, var(--border) 78%, #ffffff);
+  background: color-mix(in srgb, var(--surface) 88%, #ffffff);
+  border-radius: 1.6rem;
+  box-shadow: 0 12px 30px -24px rgba(20, 38, 45, 0.45);
+}
+
+.hero-card {
+  border: 1px solid color-mix(in srgb, var(--border) 72%, #ffffff);
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0) 45%),
+    color-mix(in srgb, var(--surface) 84%, #ffffff);
+  border-radius: 1.8rem;
+  box-shadow: 0 14px 34px -26px rgba(17, 35, 41, 0.45);
+}
+
+.badge-soft {
+  border-radius: 999px;
+  padding: 0.26rem 0.7rem;
+  font-size: 0.69rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.btn-brand {
+  background: var(--brand);
+  color: #fff;
+}
+
+.btn-brand:hover {
+  background: var(--brand-strong);
+}
+
+.btn-accent {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-accent:hover {
+  background: var(--accent-strong);
+}
+
+.btn-ghost {
+  background: #fff;
+  border: 1px solid color-mix(in srgb, var(--border) 72%, #fff);
+  color: var(--foreground);
+}
+
+.btn-ghost:hover {
+  background: #f6f8f8;
+}
+
+@keyframes ui-fade-up {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+main > section {
+  animation: ui-fade-up 260ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main > section {
+    animation: none;
+  }
 }
 
 /* Hide native password reveal controls so only the custom toggle is shown. */

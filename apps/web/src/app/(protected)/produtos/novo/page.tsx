@@ -55,14 +55,14 @@ export default async function NovoProdutoPage({
 
   return (
     <section className="space-y-6">
-      <header className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+      <header className="hero-card flex flex-col gap-3 p-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.3em] text-[#9f2f2f]">Administracao</p>
           <h1 className="mt-2 text-3xl font-semibold">Novo produto</h1>
         </div>
         <Link
           href="/produtos"
-          className="inline-flex rounded-2xl border border-slate-900/10 px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
+          className="btn-ghost inline-flex rounded-2xl px-4 py-3 text-sm font-semibold text-slate-900"
         >
           Voltar para produtos
         </Link>

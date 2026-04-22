@@ -41,7 +41,7 @@ export function PasswordField({
         aria-label={visible ? "Ocultar senha" : "Mostrar senha"}
         aria-controls={inputId}
         onClick={() => setVisible((value) => !value)}
-        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md border border-transparent p-1 text-slate-500 transition hover:border-slate-200 hover:bg-slate-100 hover:text-slate-800"
       >
         {visible ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
       </button>

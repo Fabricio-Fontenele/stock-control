@@ -11,18 +11,6 @@ const alertSections = [
     title: "Estoque baixo",
     description: "Produtos abaixo do minimo configurado",
     accent: "bg-red-100 text-red-700"
-  },
-  {
-    key: "expiringSoon",
-    title: "Vencendo",
-    description: "Produtos com lotes vencendo em ate 15 dias",
-    accent: "bg-amber-100 text-amber-800"
-  },
-  {
-    key: "expired",
-    title: "Vencidos",
-    description: "Produtos com lotes vencidos e bloqueados para saida comum",
-    accent: "bg-slate-900 text-white"
   }
 ] as const;
 
@@ -50,11 +38,11 @@ export default async function AlertasPage() {
 
   return (
     <section className="space-y-6">
-      <header>
+      <header className="hero-card p-6">
         <p className="text-xs uppercase tracking-[0.3em] text-[#9f2f2f]">Administracao</p>
         <h1 className="mt-2 text-3xl font-semibold">Alertas</h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-700">
-          Painel administrativo para estoque baixo, itens vencendo e lotes vencidos.
+          Painel administrativo para acompanhamento de produtos abaixo do estoque minimo.
         </p>
       </header>
 
@@ -64,29 +52,21 @@ export default async function AlertasPage() {
 
       {alerts ? (
         <>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-[1.75rem] border border-slate-900/10 bg-white/80 p-5 shadow-sm">
+          <div className="grid gap-4 md:grid-cols-1">
+            <div className="surface-card p-5">
               <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Estoque baixo</p>
               <p className="mt-2 text-3xl font-semibold text-slate-950">{alerts.belowMinimum.length}</p>
             </div>
-            <div className="rounded-[1.75rem] border border-slate-900/10 bg-white/80 p-5 shadow-sm">
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Vencendo</p>
-              <p className="mt-2 text-3xl font-semibold text-slate-950">{alerts.expiringSoon.length}</p>
-            </div>
-            <div className="rounded-[1.75rem] border border-slate-900/10 bg-white/80 p-5 shadow-sm">
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Vencidos</p>
-              <p className="mt-2 text-3xl font-semibold text-slate-950">{alerts.expired.length}</p>
-            </div>
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-3">
+          <div className="grid gap-6 xl:grid-cols-1">
           {alertSections.map((section) => {
             const items = alerts?.[section.key] ?? [];
 
             return (
               <article
                 key={section.key}
-                className="rounded-[1.75rem] border border-slate-900/10 bg-white/80 p-6 shadow-sm"
+                className="surface-card p-6"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -132,12 +112,10 @@ export default async function AlertasPage() {
             );
           })}
           </div>
-          {alerts.belowMinimum.length === 0 &&
-          alerts.expiringSoon.length === 0 &&
-          alerts.expired.length === 0 ? (
+          {alerts.belowMinimum.length === 0 ? (
             <EmptyState
               title="Nenhum alerta ativo"
-              description="Neste momento nao ha produtos abaixo do minimo, vencendo ou vencidos."
+              description="Neste momento nao ha produtos abaixo do minimo."
             />
           ) : null}
         </>

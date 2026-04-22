@@ -63,7 +63,7 @@ interface CategoryCardProps {
 
 function CategoryCard({ category }: CategoryCardProps) {
   return (
-    <div className="rounded-[1.75rem] border border-slate-900/10 bg-white/80 p-5 shadow-sm">
+    <div className="surface-card p-5">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#16353f] text-white">
@@ -105,7 +105,7 @@ export default async function CategoriasPage({
 
   return (
     <section className="space-y-6">
-      <header className="rounded-[1.75rem] border border-slate-900/10 bg-white/65 p-6 shadow-sm">
+      <header className="hero-card p-6">
         <p className="text-xs uppercase tracking-[0.3em] text-[#9f2f2f]">Administracao</p>
         <h1 className="mt-2 text-3xl font-semibold">Categorias</h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-700">
@@ -124,10 +124,10 @@ export default async function CategoriasPage({
         <ToastNotice tone="success" message="Categoria excluida com sucesso." />
       ) : null}
 
-      <form action={createCategoryAction} className="grid gap-4 rounded-[1.75rem] border border-slate-900/10 bg-white/80 p-6 shadow-sm md:grid-cols-[1fr_1fr_auto]">
-        <input name="name" required placeholder="Nova categoria" className="rounded-2xl border border-slate-300 px-4 py-3" />
-        <input name="description" placeholder="Descricao" className="rounded-2xl border border-slate-300 px-4 py-3" />
-        <button type="submit" className="rounded-2xl bg-[#9f2f2f] px-5 py-3 font-semibold text-white transition hover:bg-[#842626]">
+      <form action={createCategoryAction} className="surface-card grid gap-4 p-6 md:grid-cols-[1fr_1fr_auto]">
+        <input name="name" required placeholder="Nova categoria" className="rounded-2xl px-4 py-3" />
+        <input name="description" placeholder="Descricao" className="rounded-2xl px-4 py-3" />
+        <button type="submit" className="btn-accent rounded-2xl px-5 py-3 font-semibold">
           Criar categoria
         </button>
       </form>

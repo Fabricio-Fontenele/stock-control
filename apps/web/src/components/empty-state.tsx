@@ -16,7 +16,7 @@ export function EmptyState({
   actionLabel
 }: EmptyStateProps) {
   return (
-    <div className="rounded-[1.75rem] border border-slate-900/10 bg-white/70 p-6 shadow-sm">
+    <div className="hero-card p-6">
       <div className="flex items-start gap-3">
         <span className="mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[#16353f]/10 text-[#16353f]">
           <BoxIcon className="h-4 w-4" />
@@ -28,7 +28,7 @@ export function EmptyState({
         <div className="mt-5">
           <Link
             href={actionHref}
-            className="inline-flex rounded-2xl bg-[#16353f] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#0f2a33]"
+            className="btn-brand inline-flex rounded-2xl px-4 py-3 text-sm font-semibold"
           >
             {actionLabel}
           </Link>
