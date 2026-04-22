@@ -33,17 +33,15 @@ async function createQuickExitAction(formData: FormData) {
   } catch (error) {
     const message =
       error instanceof BackendError ? error.message : "Falha ao registrar saida";
-    redirect(`/estoque/saida?error=${encodeURIComponent(message)}`);
+    redirect(`/estoque?movementStatus=error&movementMessage=${encodeURIComponent(message)}`);
   }
 
-  redirect("/estoque/saida?success=1");
+  redirect("/estoque?movementStatus=success&movementMessage=Saida%20registrada%20com%20sucesso.");
 }
 
 interface SaidaRapidaPageProps {
   searchParams: Promise<{
     productId?: string;
-    error?: string;
-    success?: string;
   }>;
 }
 
@@ -84,14 +82,6 @@ export default async function SaidaRapidaPage({ searchParams }: SaidaRapidaPageP
           Registrar saida de unidades no estoque.
         </p>
       </header>
-
-      {params.error ? (
-        <FeedbackBanner tone="error">{params.error}</FeedbackBanner>
-      ) : null}
-
-      {params.success === "1" ? (
-        <FeedbackBanner tone="success">Saida registrada com sucesso.</FeedbackBanner>
-      ) : null}
 
       {loadError ? <FeedbackBanner tone="error">{loadError}</FeedbackBanner> : null}
 

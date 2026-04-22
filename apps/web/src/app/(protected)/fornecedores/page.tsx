@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { apiFetch, BackendError } from "@/lib/api/backend";
+import { ConfirmSubmitForm } from "@/components/confirm-submit-form";
 import { requireAdminSession } from "@/lib/auth/guards";
 import { ToastNotice } from "@/components/toast-notice";
 import { EmptyState } from "@/components/empty-state";
@@ -80,15 +81,16 @@ function SupplierCard({ supplier }: SupplierCardProps) {
           </div>
         </div>
 
-        <form action={deleteSupplierAction}>
-          <input type="hidden" name="supplierId" value={supplier.id} />
-          <button
-            type="submit"
-            className="rounded-xl border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-50"
-          >
-            Excluir
-          </button>
-        </form>
+        <ConfirmSubmitForm
+          action={deleteSupplierAction}
+          hiddenFields={[{ name: "supplierId", value: supplier.id }]}
+          triggerLabel="Excluir"
+          triggerClassName="rounded-xl border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-50"
+          dialogTitle="Excluir fornecedor"
+          dialogDescription="O fornecedor sera removido definitivamente. Essa acao nao pode ser desfeita."
+          confirmLabel="Sim, excluir"
+          confirmPendingLabel="Excluindo..."
+        />
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">

@@ -57,7 +57,7 @@ export class PostgresProductRepository implements ProductRepository {
         'product_sku_seq',
         GREATEST(
           (
-            SELECT COALESCE(MAX(CAST(sku AS INTEGER)), 0) + 1
+            SELECT COALESCE(MAX(CAST(sku AS BIGINT)), 0) + 1
             FROM products
             WHERE sku ~ $1
           ),

@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { Route } from "next";
 
+import { ConfirmSubmitForm } from "@/components/confirm-submit-form";
 import { PasswordField } from "@/components/password-field";
 import { UsersIcon } from "@/components/ui-icons";
 import { apiFetch, BackendError } from "@/lib/api/backend";
@@ -144,15 +145,16 @@ function UserCard({ user }: { user: UserItem }) {
 
         <div className="flex flex-wrap items-center gap-2">
           {user.role !== "admin" ? (
-            <form action={deleteUserAction}>
-              <input type="hidden" name="userId" value={user.id} />
-              <button
-                type="submit"
-              className="rounded-xl border border-red-200 px-3 py-2 text-xs font-medium text-red-600 transition hover:bg-red-50"
-              >
-                Excluir
-              </button>
-            </form>
+            <ConfirmSubmitForm
+              action={deleteUserAction}
+              hiddenFields={[{ name: "userId", value: user.id }]}
+              triggerLabel="Excluir"
+              triggerClassName="rounded-xl border border-red-200 px-3 py-2 text-xs font-medium text-red-600 transition hover:bg-red-50"
+              dialogTitle="Excluir funcionario"
+              dialogDescription="Esta acao remove a conta de acesso do funcionario e nao pode ser desfeita."
+              confirmLabel="Sim, excluir"
+              confirmPendingLabel="Excluindo..."
+            />
           ) : null}
 
           <form action={changePasswordAction} className="flex items-center gap-2">

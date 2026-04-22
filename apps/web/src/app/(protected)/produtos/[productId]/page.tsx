@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { apiFetch, BackendError } from "@/lib/api/backend";
+import { ConfirmSubmitForm } from "@/components/confirm-submit-form";
 import { requireAdminSession } from "@/lib/auth/guards";
 import { ProductForm } from "@/features/products/product-form";
 import { ToastNotice } from "@/components/toast-notice";
@@ -125,15 +126,18 @@ export default async function EditarProdutoPage({
           SKU atual: <strong className="text-slate-900">{product.sku}</strong>
         </span>
         {product.status === "active" ? (
-          <form action={deactivateProductAction} className="ml-auto">
-            <input type="hidden" name="productId" value={product.id} />
-            <button
-              type="submit"
-              className="btn-accent rounded-2xl px-4 py-3 text-sm font-semibold"
-            >
-              Desativar produto
-            </button>
-          </form>
+          <div className="ml-auto">
+            <ConfirmSubmitForm
+              action={deactivateProductAction}
+              hiddenFields={[{ name: "productId", value: product.id }]}
+              triggerLabel="Desativar produto"
+              triggerClassName="btn-accent rounded-2xl px-4 py-3 text-sm font-semibold"
+              dialogTitle="Desativar produto"
+              dialogDescription="O produto ficara indisponivel para operacoes comuns ate ser reativado."
+              confirmLabel="Sim, desativar"
+              confirmPendingLabel="Desativando..."
+            />
+          </div>
         ) : (
           <form action={reactivateProductAction} className="ml-auto">
             <input type="hidden" name="productId" value={product.id} />

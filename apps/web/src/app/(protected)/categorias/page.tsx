@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { apiFetch, BackendError } from "@/lib/api/backend";
+import { ConfirmSubmitForm } from "@/components/confirm-submit-form";
 import { EmptyState } from "@/components/empty-state";
 import { requireAdminSession } from "@/lib/auth/guards";
 import { ToastNotice } from "@/components/toast-notice";
@@ -77,15 +78,16 @@ function CategoryCard({ category }: CategoryCardProps) {
           </div>
         </div>
 
-        <form action={deleteCategoryAction}>
-          <input type="hidden" name="categoryId" value={category.id} />
-          <button
-            type="submit"
-            className="rounded-xl border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-50"
-          >
-            Excluir
-          </button>
-        </form>
+        <ConfirmSubmitForm
+          action={deleteCategoryAction}
+          hiddenFields={[{ name: "categoryId", value: category.id }]}
+          triggerLabel="Excluir"
+          triggerClassName="rounded-xl border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-50"
+          dialogTitle="Excluir categoria"
+          dialogDescription="A categoria sera removida definitivamente. Essa acao nao pode ser desfeita."
+          confirmLabel="Sim, excluir"
+          confirmPendingLabel="Excluindo..."
+        />
       </div>
     </div>
   );

@@ -5,7 +5,7 @@ SELECT setval(
   'product_sku_seq',
   GREATEST(
     (
-      SELECT COALESCE(MAX(CAST(sku AS INTEGER)), 0)
+      SELECT COALESCE(MAX(CAST(sku AS BIGINT)), 0)
       FROM products
       WHERE sku ~ '^[0-9]+$'
     ),

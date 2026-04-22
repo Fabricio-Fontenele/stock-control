@@ -4,7 +4,6 @@ import Link from "next/link";
 
 import { apiFetch, BackendError } from "@/lib/api/backend";
 import { requireAdminSession } from "@/lib/auth/guards";
-import { ToastNotice } from "@/components/toast-notice";
 import { FeedbackBanner } from "@/components/feedback-banner";
 import { ArrowOutIcon, BoxIcon } from "@/components/ui-icons";
 import type { ProductStockView } from "@/lib/api/types";
@@ -30,16 +29,14 @@ async function createEntryAction(formData: FormData) {
   } catch (error) {
     const message =
       error instanceof BackendError ? error.message : "Falha ao registrar entrada";
-    redirect(`/entradas?error=${encodeURIComponent(message)}`);
+    redirect(`/estoque?movementStatus=error&movementMessage=${encodeURIComponent(message)}`);
   }
 
-  redirect("/entradas?success=1");
+  redirect("/estoque?movementStatus=success&movementMessage=Entrada%20registrada%20com%20sucesso.");
 }
 
 interface EntradasPageProps {
   searchParams: Promise<{
-    error?: string;
-    success?: string;
     productId?: string;
   }>;
 }
@@ -82,10 +79,6 @@ export default async function EntradasPage({ searchParams }: EntradasPageProps) 
         </p>
       </header>
 
-      {params.error ? <ToastNotice tone="error" message={params.error} /> : null}
-      {params.success === "1" ? (
-        <ToastNotice tone="success" message="Entrada registrada com sucesso." />
-      ) : null}
       {loadError ? <FeedbackBanner tone="error">{loadError}</FeedbackBanner> : null}
 
       {product ? (

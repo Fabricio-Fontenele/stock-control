@@ -5,6 +5,7 @@ import { apiFetch, BackendError } from "@/lib/api/backend";
 import { getSession } from "@/lib/auth/session";
 import { EmptyState } from "@/components/empty-state";
 import { FeedbackBanner } from "@/components/feedback-banner";
+import { ToastNotice } from "@/components/toast-notice";
 import { ArrowOutIcon, PlusIcon, SearchIcon } from "@/components/ui-icons";
 import type { ProductStockView } from "@/lib/api/types";
 
@@ -15,6 +16,8 @@ interface EstoquePageProps {
     sortOrder?: string;
     page?: string;
     pageSize?: string;
+    movementStatus?: string;
+    movementMessage?: string;
   }>;
 }
 
@@ -99,6 +102,8 @@ export default async function EstoquePage({ searchParams }: EstoquePageProps) {
   const sortOrder = normalizeSortOrder(params.sortOrder);
   const requestedPage = normalizePage(params.page);
   const pageSize = normalizePageSize(params.pageSize);
+  const movementStatus = params.movementStatus;
+  const movementMessage = params.movementMessage?.trim() ?? "";
   const stockUrl = search
     ? `/inventory/stock?search=${encodeURIComponent(search)}`
     : "/inventory/stock";
@@ -162,6 +167,13 @@ export default async function EstoquePage({ searchParams }: EstoquePageProps) {
 
   return (
     <section className="space-y-6">
+      {movementStatus === "success" && movementMessage ? (
+        <ToastNotice tone="success" message={movementMessage} />
+      ) : null}
+      {movementStatus === "error" && movementMessage ? (
+        <ToastNotice tone="error" message={movementMessage} />
+      ) : null}
+
       <header className="hero-card p-6">
         <p className="text-xs uppercase tracking-[0.3em] text-[#9f2f2f]">Operacao</p>
         <h1 className="mt-2 text-3xl font-semibold">Estoque</h1>
