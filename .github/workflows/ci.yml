@@ -33,6 +33,10 @@ jobs:
   web:
     name: Web build
     runs-on: ubuntu-latest
+    env:
+      WEB_SESSION_SECRET: ci-build-only-secret-with-32-chars-min
+      STOCK_CONTROL_API_URL: http://127.0.0.1:3333
+      NEXT_PUBLIC_STOCK_CONTROL_API_URL: http://127.0.0.1:3333
 
     steps:
       - name: Checkout
