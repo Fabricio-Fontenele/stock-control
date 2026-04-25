@@ -8,8 +8,33 @@ on:
 
 jobs:
   backend:
-    name: Backend build and unit tests
+    name: Backend build and tests
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: stock_control
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d stock_control"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      NODE_ENV: test
+      PORT: 3333
+      DATABASE_HOST: 127.0.0.1
+      DATABASE_PORT: 5433
+      DATABASE_NAME: stock_control
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5433/stock_control
+      JWT_SECRET: ci-test-secret-change-me
+      JWT_EXPIRES_IN: 8h
 
     steps:
       - name: Checkout
@@ -27,8 +52,13 @@ jobs:
       - name: Build backend
         run: npm run build
 
-      - name: Run unit tests
-        run: npm run test:unit
+      - name: Prepare test database
+        run: |
+          npm run db:migrate
+          npm run db:seed:admin
+
+      - name: Run backend test suite
+        run: npm test
 
   web:
     name: Web build
