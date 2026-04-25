@@ -133,5 +133,27 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
     };
   });
 
+  app.get("/ready", async (_request, reply) => {
+    try {
+      await app.db.query("SELECT 1");
+
+      return {
+        status: "ready",
+        checks: {
+          database: "ok"
+        }
+      };
+    } catch (error) {
+      app.log.error({ error }, "readiness.check.failed");
+
+      return reply.status(503).send({
+        status: "not_ready",
+        checks: {
+          database: "error"
+        }
+      });
+    }
+  });
+
   return app;
 }

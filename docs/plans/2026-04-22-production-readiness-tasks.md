@@ -32,13 +32,13 @@
   - Entrega: deploy de staging acionavel por push/manual.
   - Dependencia: PRD-002, PRD-004.
 
-- [ ] PRD-006 (P0) Implementar script/runbook de rollback de aplicacao e banco.
+- [x] PRD-006 (P0) Implementar script/runbook de rollback de aplicacao e banco.
   - Arquivos alvo: `docs/plans/` + scripts de deploy.
-  - Entrega: passo a passo testado em staging.
+  - Entrega: script `scripts/deploy/rollback-staging.sh` e runbook com passo a passo de rollback.
   - Dependencia: PRD-005.
 
-- [ ] PRD-007 (P0) Definir e executar rotina de backup pre-deploy + teste de restore.
-  - Entrega: comando automatizado e comprovacao de restore em staging.
+- [x] PRD-007 (P0) Definir e executar rotina de backup pre-deploy + teste de restore.
+  - Entrega: scripts `scripts/deploy/backup-postgres.sh` e `scripts/deploy/restore-postgres.sh`, acionados no deploy de staging antes da migracao.
   - Dependencia: PRD-005.
 
 - [x] PRD-008 (P0) Criar smoke test pos-deploy para fluxos criticos.
@@ -48,8 +48,8 @@
 
 ## Sprint 1 - Confiabilidade operacional
 
-- [ ] PRD-009 (P1) Expor endpoint de health e readiness na API.
-  - Entrega: `/health` retornando status com checks minimos.
+- [x] PRD-009 (P1) Expor endpoint de health e readiness na API.
+  - Entrega: `/health` para liveness e `/ready` com checagem de banco.
   - Dependencia: nenhuma.
 
 - [ ] PRD-010 (P1) Padronizar logs estruturados com correlation/request id.

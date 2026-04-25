@@ -57,7 +57,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
-          source: docker-compose.staging.yml
+          source: "docker-compose.staging.yml,scripts/deploy/backup-postgres.sh,scripts/deploy/restore-postgres.sh,scripts/deploy/rollback-staging.sh"
           target: ${{ secrets.VPS_DEPLOY_PATH }}
 
       - name: Deploy on VPS
@@ -88,8 +88,11 @@ jobs:
 
             docker compose --env-file .env.staging -f docker-compose.staging.yml pull
             docker compose --env-file .env.staging -f docker-compose.staging.yml up -d postgres
+            chmod +x scripts/deploy/*.sh
 
-            docker compose --env-file .env.staging -f docker-compose.staging.yml run --rm api node dist/infrastructure/persistence/postgres/migrate.js
+            ./scripts/deploy/backup-postgres.sh .env.staging docker-compose.staging.yml
+
+            docker compose --env-file .env.staging -f docker-compose.staging.yml run --rm api npm run db:migrate:prod
 
             docker compose --env-file .env.staging -f docker-compose.staging.yml up -d api web
             docker compose --env-file .env.staging -f docker-compose.staging.yml ps

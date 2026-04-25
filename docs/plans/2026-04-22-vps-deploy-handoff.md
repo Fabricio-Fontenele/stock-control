@@ -179,8 +179,11 @@ Campos críticos:
 
 ## Próximo passo recomendado (primeiro ao voltar)
 
-Executar `PRD-007` e `PRD-006`:
-- backup/restore automatizado e comprovado
-- runbook de rollback com teste real em staging
+Executar o workflow `Deploy Staging (VPS)` em ambiente real e registrar evidencias:
+- backup criado em `backups/`
+- migracao executada
+- containers `healthy`
+- smoke pos-deploy aprovado
+- rollback testado ao menos uma vez com uma tag anterior
 
-Isso fecha os últimos bloqueantes críticos para go-live seguro.
+Os scripts de backup, restore e rollback ja estao versionados; falta a comprovacao operacional na VPS.

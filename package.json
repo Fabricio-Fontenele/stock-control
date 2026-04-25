@@ -20,7 +20,9 @@
     "db:down": "docker compose down",
     "db:logs": "docker compose logs -f postgres",
     "db:migrate": "tsx src/infrastructure/persistence/postgres/migrate.ts",
+    "db:migrate:prod": "node dist/infrastructure/persistence/postgres/migrate.js",
     "db:seed:admin": "tsx src/infrastructure/persistence/postgres/seed-admin.ts",
+    "db:seed:admin:prod": "node dist/infrastructure/persistence/postgres/seed-admin.js",
     "db:seed:catalog": "tsx src/infrastructure/persistence/postgres/seed-catalog.ts"
   },
   "dependencies": {

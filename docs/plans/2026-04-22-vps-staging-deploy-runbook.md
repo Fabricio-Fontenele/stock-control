@@ -63,9 +63,10 @@ NEXT_PUBLIC_STOCK_CONTROL_API_URL=https://staging-api.example.com
 4. Escrita de `.env.staging` na VPS via secret.
 5. Pull das imagens no host remoto.
 6. Subida do Postgres.
-7. Execucao de migracoes (`node dist/.../migrate.js`).
-8. Subida/atualizacao de API e Web.
-9. Execucao automatica de smoke web:
+7. Backup pre-deploy do Postgres em `backups/`.
+8. Execucao de migracoes (`node dist/.../migrate.js`).
+9. Subida/atualizacao de API e Web.
+10. Execucao automatica de smoke web:
    - login
    - `/estoque`
    - `/estoque/saida`
@@ -80,15 +81,34 @@ NEXT_PUBLIC_STOCK_CONTROL_API_URL=https://staging-api.example.com
 cd /opt/stock-control/staging
 docker compose --env-file .env.staging -f docker-compose.staging.yml pull
 docker compose --env-file .env.staging -f docker-compose.staging.yml up -d postgres
-docker compose --env-file .env.staging -f docker-compose.staging.yml run --rm api node dist/infrastructure/persistence/postgres/migrate.js
+./scripts/deploy/backup-postgres.sh .env.staging docker-compose.staging.yml
+docker compose --env-file .env.staging -f docker-compose.staging.yml run --rm api npm run db:migrate:prod
 docker compose --env-file .env.staging -f docker-compose.staging.yml up -d api web
 docker compose --env-file .env.staging -f docker-compose.staging.yml ps
 ```
 
+## Backup e restore
+
+Backup manual antes de qualquer operacao sensivel:
+
+```bash
+cd /opt/stock-control/staging
+./scripts/deploy/backup-postgres.sh .env.staging docker-compose.staging.yml
+```
+
+Restore manual a partir de um dump existente:
+
+```bash
+cd /opt/stock-control/staging
+./scripts/deploy/restore-postgres.sh backups/stock-control-YYYYMMDDTHHMMSSZ.dump .env.staging docker-compose.staging.yml
+```
+
+O restore para `api` e `web`, recria a base configurada no container Postgres e sobe os servicos novamente.
+
 ## Validacao pos-deploy
 
 1. Verificar containers `healthy/running` (`docker compose ps`).
-2. Verificar `/health` da API.
+2. Verificar `/health` e `/ready` da API.
 3. Executar smoke funcional:
    - login
    - listagem de estoque
@@ -98,7 +118,14 @@ docker compose --env-file .env.staging -f docker-compose.staging.yml ps
 
 ## Rollback rapido
 
-1. Descobrir tag anterior funcional.
-2. Ajustar `IMAGE_TAG` no shell remoto.
-3. Rodar `docker compose pull` + `up -d` novamente.
-4. Se erro de schema, restaurar backup pre-deploy.
+1. Descobrir tag anterior funcional no GHCR ou no historico do workflow.
+2. Se houve problema de schema/dados, selecionar o backup pre-deploy em `backups/`.
+3. Executar rollback da aplicacao, com restore opcional:
+
+```bash
+cd /opt/stock-control/staging
+./scripts/deploy/rollback-staging.sh <tag-anterior>
+./scripts/deploy/rollback-staging.sh <tag-anterior> backups/stock-control-YYYYMMDDTHHMMSSZ.dump
+```
+
+4. Validar `docker compose ps`, `/ready` e smoke funcional.
