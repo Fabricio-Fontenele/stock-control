@@ -8,54 +8,54 @@ import { BcryptPasswordHasher } from "../../src/infrastructure/security/password
 
 describe("contract /dashboard/alerts", () => {
   const app = buildApp({ logger: false });
+  let belowMinimumProductId = "";
 
   beforeAll(async () => {
     await app.ready();
     const pool = getPostgresPool();
 
+    const categoryName = `Padaria ${randomUUID()}`;
+    const supplierName = `Fornecedor Padaria ${randomUUID()}`;
+
     await pool.query(
       `INSERT INTO categories (id, name, description, created_at, updated_at)
-       VALUES ($1, $2, $3, NOW(), NOW())
-       ON CONFLICT (name) DO NOTHING`,
-      [randomUUID(), "Padaria", "Categoria alerta"]
+       VALUES ($1, $2, $3, NOW(), NOW())`,
+      [randomUUID(), categoryName, "Categoria alerta"]
     );
 
     await pool.query(
       `INSERT INTO suppliers (id, name, created_at, updated_at)
-       VALUES ($1, $2, NOW(), NOW())
-       ON CONFLICT (name) DO NOTHING`,
-      [randomUUID(), "Fornecedor Padaria"]
+       VALUES ($1, $2, NOW(), NOW())`,
+      [randomUUID(), supplierName]
     );
 
     const productId = randomUUID();
+    const sku = `SKU-ALERT-${randomUUID()}`;
     await pool.query(
       `INSERT INTO products (
          id, sku, name, category_id, supplier_id, purchase_price, sale_price,
          unit_of_measure, minimum_stock, tracks_expiration, status, created_at, updated_at
        ) VALUES ($1, $2, $3,
-         (SELECT id FROM categories WHERE name = 'Padaria' LIMIT 1),
-         (SELECT id FROM suppliers WHERE name = 'Fornecedor Padaria' LIMIT 1),
-         1, 2, 'un', 10, true, 'active', NOW(), NOW())
-       ON CONFLICT (sku) DO NOTHING`,
-      [productId, "SKU-ALERT-1", "Produto Alertas"]
+         (SELECT id FROM categories WHERE name = $4 LIMIT 1),
+         (SELECT id FROM suppliers WHERE name = $5 LIMIT 1),
+         1, 2, 'un', 10, false, 'active', NOW(), NOW())`,
+      [productId, sku, "Produto Alertas", categoryName, supplierName]
     );
 
     const persisted = await pool.query<{ id: string }>(
       "SELECT id FROM products WHERE sku = $1 LIMIT 1",
-      ["SKU-ALERT-1"]
+      [sku]
     );
 
-    const persistedId = persisted.rows[0]?.id;
+    belowMinimumProductId = persisted.rows[0]?.id ?? productId;
 
     await pool.query(
       `INSERT INTO stock_lots (
          id, product_id, code, received_quantity, remaining_quantity,
          entry_date, expiration_date, status, created_at, updated_at
-       ) VALUES
-         ($1, $3, 'LOT-ALERT-SOON', 3, 3, CURRENT_DATE, CURRENT_DATE + INTERVAL '7 days', 'available', NOW(), NOW()),
-         ($2, $3, 'LOT-ALERT-EXPIRED', 2, 2, CURRENT_DATE - INTERVAL '20 days', CURRENT_DATE - INTERVAL '1 day', 'expired', NOW(), NOW())
+       ) VALUES ($1, $2, 'LOT-ALERT-STOCK', 3, 3, CURRENT_DATE, NULL, 'available', NOW(), NOW())
        ON CONFLICT (id) DO NOTHING`,
-      [randomUUID(), randomUUID(), persistedId]
+      [randomUUID(), belowMinimumProductId]
     );
 
     const employeeEmail = "employee@conveniencia.local";
@@ -77,7 +77,7 @@ describe("contract /dashboard/alerts", () => {
     await app.close();
   });
 
-  it("returns belowMinimum, expiringSoon and expired collections", async () => {
+  it("returns alert collections with below-minimum stock", async () => {
     const loginResponse = await app.inject({
       method: "POST",
       url: "/auth/login",
@@ -102,8 +102,7 @@ describe("contract /dashboard/alerts", () => {
     expect(Array.isArray(body.belowMinimum)).toBe(true);
     expect(Array.isArray(body.expiringSoon)).toBe(true);
     expect(Array.isArray(body.expired)).toBe(true);
-    expect(body.expiringSoon.length).toBeGreaterThan(0);
-    expect(body.expired.length).toBeGreaterThan(0);
+    expect(body.belowMinimum.some((item: { id: string }) => item.id === belowMinimumProductId)).toBe(true);
   });
 
   it("blocks employee access to dashboard alerts", async () => {

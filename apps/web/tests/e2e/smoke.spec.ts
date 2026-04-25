@@ -194,38 +194,19 @@ test.describe("frontend mvp smoke", () => {
     await expect(page.getByRole("link", { name: "Novo produto" }).first()).toBeVisible();
 
     await page.goto("/entradas");
-    await expect(page.getByRole("heading", { name: "Entradas por lote" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Entrada de estoque" })).toBeVisible();
 
-    const productOptionValue = await page
-      .locator('select[name="productId"] option', { hasText: seeded.sku })
-      .first()
-      .getAttribute("value");
+    await page.goto("/estoque");
+    await page.getByPlaceholder("Ex.: coca, cerveja, 000123").fill(seeded.sku);
+    await page.getByRole("button", { name: "Consultar" }).click();
+    await expect(page.getByText(seeded.productName)).toBeVisible();
+    await page.getByRole("link", { name: "Entrada" }).first().click();
 
-    if (!productOptionValue) {
-      throw new Error(`Unable to find product option for SKU ${seeded.sku}`);
-    }
-
-    await page.getByLabel("Produto").selectOption(productOptionValue);
-    await page.getByLabel("Codigo do lote").fill(`LOTE-UI-${Date.now()}`);
+    await expect(page.getByRole("heading", { name: "Entrada de estoque" })).toBeVisible();
     await page.getByLabel("Quantidade").fill("2");
-
-    const now = new Date(Date.now() + 3600000);
-    const expiration = new Date(Date.now() + 12 * 24 * 60 * 60 * 1000);
-    const formatDateTimeLocal = (value: Date) => {
-      const year = value.getFullYear();
-      const month = String(value.getMonth() + 1).padStart(2, "0");
-      const day = String(value.getDate()).padStart(2, "0");
-      const hours = String(value.getHours()).padStart(2, "0");
-      const minutes = String(value.getMinutes()).padStart(2, "0");
-
-      return `${year}-${month}-${day}T${hours}:${minutes}`;
-    };
-
-    await page.getByLabel("Data de entrada").fill(formatDateTimeLocal(now));
-    await page.getByLabel("Validade").fill(formatDateTimeLocal(expiration));
     await page.getByRole("button", { name: "Registrar entrada" }).click();
 
-    await expect(page).toHaveURL(/success=created/);
+    await expect(page).toHaveURL(/movementStatus=success/);
     await expect(page.getByText("Entrada registrada com sucesso.")).toBeVisible();
   });
 

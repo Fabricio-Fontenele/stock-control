@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { buildApp } from "../../src/app.js";
@@ -32,8 +34,8 @@ describe("contract /suppliers", () => {
         authorization: `Bearer ${token}`
       },
       payload: {
-        name: "Fornecedor Contrato Admin",
-        email: "contrato@fornecedor.local"
+        name: `Fornecedor Contrato Admin ${randomUUID()}`,
+        email: `contrato-${randomUUID()}@fornecedor.local`
       }
     });
 

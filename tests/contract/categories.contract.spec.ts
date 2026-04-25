@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { buildApp } from "../../src/app.js";
@@ -32,7 +34,7 @@ describe("contract /categories", () => {
         authorization: `Bearer ${token}`
       },
       payload: {
-        name: "Categoria Contrato Admin",
+        name: `Categoria Contrato Admin ${randomUUID()}`,
         description: "Descricao"
       }
     });

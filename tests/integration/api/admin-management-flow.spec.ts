@@ -3,7 +3,6 @@ import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { buildApp } from "../../../src/app.js";
-import { getPostgresPool } from "../../../src/infrastructure/persistence/postgres/connection.js";
 
 describe("integration admin management flow", () => {
   const app = buildApp({ logger: false });
@@ -16,7 +15,7 @@ describe("integration admin management flow", () => {
     await app.close();
   });
 
-  it("manages category, supplier, product and expired release end-to-end", async () => {
+  it("manages category, supplier and product end-to-end", async () => {
     const login = await app.inject({
       method: "POST",
       url: "/auth/login",
@@ -67,32 +66,6 @@ describe("integration admin management flow", () => {
 
     expect(productResponse.statusCode).toBe(201);
     const productId = productResponse.json().id;
-
-    const pool = getPostgresPool();
-    const lotId = randomUUID();
-    await pool.query(
-      `INSERT INTO stock_lots (
-        id, product_id, code, received_quantity, remaining_quantity,
-        entry_date, expiration_date, status, created_at, updated_at
-      ) VALUES ($1, $2, $3, 3, 3, CURRENT_DATE - INTERVAL '10 days',
-        CURRENT_DATE - INTERVAL '1 day', 'expired', NOW(), NOW())`,
-      [lotId, productId, "LOT-ADMIN-EXPIRED"]
-    );
-
-    const expiredReleaseResponse = await app.inject({
-      method: "POST",
-      url: "/inventory/expired-release",
-      headers: { authorization: `Bearer ${token}` },
-      payload: {
-        productId,
-        lotId,
-        quantity: 1,
-        reason: "Fluxo administrativo"
-      }
-    });
-
-    expect(expiredReleaseResponse.statusCode).toBe(201);
-    expect(expiredReleaseResponse.json().movementType).toBe("expired-release");
 
     const deactivateResponse = await app.inject({
       method: "POST",

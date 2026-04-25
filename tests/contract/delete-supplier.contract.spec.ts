@@ -1,9 +1,13 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { randomUUID } from "node:crypto";
+
 import { buildApp } from "../../src/app.js";
+import { getPostgresPool } from "../../src/infrastructure/persistence/postgres/connection.js";
 
 describe("DELETE /suppliers/:id", () => {
   const app = buildApp({ logger: false });
-  let supplierId = "";
+  let deletableSupplierId = "";
+  let linkedSupplierId = "";
   let token = "";
 
   beforeAll(async () => {
@@ -19,9 +23,32 @@ describe("DELETE /suppliers/:id", () => {
       method: "POST",
       url: "/suppliers",
       headers: { authorization: `Bearer ${token}` },
-      payload: { name: `Test Delete ${Date.now()}` }
+      payload: { name: `Test Delete ${randomUUID()}` }
     });
-    supplierId = createResponse.json().id;
+    deletableSupplierId = createResponse.json().id;
+
+    const linkedSupplierResponse = await app.inject({
+      method: "POST",
+      url: "/suppliers",
+      headers: { authorization: `Bearer ${token}` },
+      payload: { name: `Test Delete Linked ${randomUUID()}` }
+    });
+    linkedSupplierId = linkedSupplierResponse.json().id;
+
+    const categoryId = randomUUID();
+    const productId = randomUUID();
+    await getPostgresPool().query(
+      `INSERT INTO categories (id, name, description, created_at, updated_at)
+       VALUES ($1, $2, $3, NOW(), NOW())`,
+      [categoryId, `Categoria Supplier Delete ${randomUUID()}`, "Contrato delete"]
+    );
+    await getPostgresPool().query(
+      `INSERT INTO products (
+         id, sku, name, category_id, supplier_id, purchase_price, sale_price,
+         unit_of_measure, minimum_stock, tracks_expiration, status, created_at, updated_at
+       ) VALUES ($1, $2, $3, $4, $5, 1, 2, 'un', 1, false, 'active', NOW(), NOW())`,
+      [productId, `SKU-DEL-SUP-${randomUUID()}`, "Produto fornecedor vinculado", categoryId, linkedSupplierId]
+    );
   });
 
   afterAll(async () => {
@@ -31,7 +58,7 @@ describe("DELETE /suppliers/:id", () => {
   it("deletes supplier and returns 204", async () => {
     const deleteResponse = await app.inject({
       method: "DELETE",
-      url: `/suppliers/${supplierId}`,
+      url: `/suppliers/${deletableSupplierId}`,
       headers: { authorization: `Bearer ${token}` }
     });
 
@@ -41,7 +68,7 @@ describe("DELETE /suppliers/:id", () => {
   it("returns 409 when supplier is linked to products", async () => {
     const deleteResponse = await app.inject({
       method: "DELETE",
-      url: `/suppliers/${supplierId}`,
+      url: `/suppliers/${linkedSupplierId}`,
       headers: { authorization: `Bearer ${token}` }
     });
 

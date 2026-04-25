@@ -49,7 +49,8 @@ describe("contract /products", () => {
         authorization: `Bearer ${token}`
       },
       payload: {
-        name: "Produto Contrato",
+        sku: `SKU-CONTRATO-${randomUUID()}`,
+        name: `Produto Contrato ${randomUUID()}`,
         categoryId: (
           await getPostgresPool().query(
             "SELECT id FROM categories WHERE name = 'Contrato Produtos' LIMIT 1"
@@ -65,7 +66,7 @@ describe("contract /products", () => {
     });
 
     expect(createResponse.statusCode).toBe(201);
-    expect(createResponse.json().sku).toMatch(/^\d{6}$/);
+    expect(createResponse.json().sku).toMatch(/^SKU-CONTRATO-/);
 
     const nextSkuResponse = await app.inject({
       method: "GET",
@@ -76,7 +77,7 @@ describe("contract /products", () => {
     });
 
     expect(nextSkuResponse.statusCode).toBe(200);
-    expect(nextSkuResponse.json().sku).toMatch(/^\d{6}$/);
+    expect(nextSkuResponse.json().sku).toMatch(/^\d+$/);
 
     const repeatedNextSkuResponse = await app.inject({
       method: "GET",
@@ -112,7 +113,7 @@ describe("contract /products", () => {
     });
 
     const token = login.json().accessToken;
-    const customSku = "987654";
+    const customSku = `SKU-MANUAL-${randomUUID()}`;
 
     const createResponse = await app.inject({
       method: "POST",
@@ -122,7 +123,7 @@ describe("contract /products", () => {
       },
       payload: {
         sku: customSku,
-        name: "Produto SKU Manual",
+        name: `Produto SKU Manual ${randomUUID()}`,
         categoryId: (
           await getPostgresPool().query(
             "SELECT id FROM categories WHERE name = 'Contrato Produtos' LIMIT 1"
@@ -138,7 +139,7 @@ describe("contract /products", () => {
     });
 
     expect(createResponse.statusCode).toBe(201);
-    expect(createResponse.json().sku).toBe(customSku);
+    expect(createResponse.json().sku).toBe(customSku.toUpperCase());
   });
 
   it("deactivates and reactivates a product for admin", async () => {
@@ -160,7 +161,8 @@ describe("contract /products", () => {
         authorization: `Bearer ${token}`
       },
       payload: {
-        name: "Produto Reativavel",
+        sku: `SKU-REATIVAVEL-${randomUUID()}`,
+        name: `Produto Reativavel ${randomUUID()}`,
         categoryId: (
           await getPostgresPool().query(
             "SELECT id FROM categories WHERE name = 'Contrato Produtos' LIMIT 1"

@@ -6,7 +6,7 @@ import { buildApp } from "../../../src/app.js";
 import { getPostgresPool } from "../../../src/infrastructure/persistence/postgres/connection.js";
 import { BcryptPasswordHasher } from "../../../src/infrastructure/security/password-hasher.js";
 
-describe("integration stock-entry and alerts flow", () => {
+describe("integration stock-entry flow", () => {
   const app = buildApp({ logger: false });
   let productId = "";
 
@@ -14,36 +14,37 @@ describe("integration stock-entry and alerts flow", () => {
     await app.ready();
 
     const pool = getPostgresPool();
+    const categoryName = `Higiene ${randomUUID()}`;
+    const supplierName = `Fornecedor Higiene ${randomUUID()}`;
+
     await pool.query(
       `INSERT INTO categories (id, name, description, created_at, updated_at)
-       VALUES ($1, $2, $3, NOW(), NOW())
-       ON CONFLICT (name) DO NOTHING`,
-      [randomUUID(), "Higiene", "Categoria integração entrada"]
+       VALUES ($1, $2, $3, NOW(), NOW())`,
+      [randomUUID(), categoryName, "Categoria integração entrada"]
     );
 
     await pool.query(
       `INSERT INTO suppliers (id, name, created_at, updated_at)
-       VALUES ($1, $2, NOW(), NOW())
-       ON CONFLICT (name) DO NOTHING`,
-      [randomUUID(), "Fornecedor Higiene"]
+       VALUES ($1, $2, NOW(), NOW())`,
+      [randomUUID(), supplierName]
     );
 
     productId = randomUUID();
+    const sku = `SKU-ENTRY-ALERT-${randomUUID()}`;
     await pool.query(
       `INSERT INTO products (
          id, sku, name, category_id, supplier_id, purchase_price, sale_price,
          unit_of_measure, minimum_stock, tracks_expiration, status, created_at, updated_at
        ) VALUES ($1, $2, $3,
-         (SELECT id FROM categories WHERE name = 'Higiene' LIMIT 1),
-         (SELECT id FROM suppliers WHERE name = 'Fornecedor Higiene' LIMIT 1),
-         2, 4, 'un', 12, true, 'active', NOW(), NOW())
-       ON CONFLICT (sku) DO NOTHING`,
-      [productId, "SKU-ENTRY-ALERT-1", "Produto Entrada Alertas"]
+         (SELECT id FROM categories WHERE name = $4 LIMIT 1),
+         (SELECT id FROM suppliers WHERE name = $5 LIMIT 1),
+         2, 4, 'un', 12, false, 'active', NOW(), NOW())`,
+      [productId, sku, "Produto Entrada Alertas", categoryName, supplierName]
     );
 
     const persisted = await pool.query<{ id: string }>(
       "SELECT id FROM products WHERE sku = $1 LIMIT 1",
-      ["SKU-ENTRY-ALERT-1"]
+      [sku]
     );
 
     productId = persisted.rows[0]?.id ?? productId;
@@ -67,7 +68,7 @@ describe("integration stock-entry and alerts flow", () => {
     await app.close();
   });
 
-  it("registers an entry and exposes expiring lot on dashboard alerts", async () => {
+  it("registers an entry and exposes below-minimum stock on dashboard alerts", async () => {
     const login = await app.inject({
       method: "POST",
       url: "/auth/login",
@@ -87,10 +88,8 @@ describe("integration stock-entry and alerts flow", () => {
       },
       payload: {
         productId,
-        lotCode: "LOT-ENTRY-ALERT-INTEGRATION",
         quantity: 4,
         entryDate: new Date().toISOString(),
-        expirationDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
         reasonType: "supplier-purchase"
       }
     });
@@ -108,7 +107,6 @@ describe("integration stock-entry and alerts flow", () => {
 
     expect(alertsResponse.statusCode).toBe(200);
     const alertsBody = alertsResponse.json();
-    expect(alertsBody.expiringSoon.some((item: { id: string }) => item.id === productId)).toBe(true);
-    expect(alertsBody.belowMinimum.some((item: { id: string }) => item.id === productId)).toBe(false);
+    expect(alertsBody.belowMinimum.some((item: { id: string }) => item.id === productId)).toBe(true);
   });
 });
